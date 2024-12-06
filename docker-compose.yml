@@ -7,7 +7,7 @@ services:
     build:
         context: .
         dockerfile: ./compose/postgres/Dockerfile
-    image: postgres
+    image: postgres:16
     volumes:
       - supera_enem_postgres_data:/var/lib/postgresql/data
       - supera_enem_postgres_backup:/backups
@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/spring/Dockerfile
-    image: spring
+    image: spring-app:latest
     volumes:
       - .:/app
     environment:
