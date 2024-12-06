@@ -3,24 +3,12 @@ volumes:
     supera_enem_postgres_backup: {}
 
 services:
-  postgres:
-    build:
-        context: .
-        dockerfile: ./compose/postgres/Dockerfile
-    image: postgres:16
-    volumes:
-      - supera_enem_postgres_data:/var/lib/postgresql/data
-      - supera_enem_postgres_backup:/backups
-    env_file:
-      - ./.envs/.postgres
-    ports:
-      - "5432:5432"
-
   app:
     build:
       context: .
       dockerfile: ./compose/spring/Dockerfile
-    image: spring-app:latest
+    image: supera_enem_spring:latest
+    container_name: supera_enem_spring
     volumes:
       - .:/app
     environment:
@@ -39,6 +27,20 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+
+  postgres:
+    build:
+        context: .
+        dockerfile: ./compose/postgres/Dockerfile
+    image: supera_enem_postgres:latest
+    container_name: supera_enem_postgres
+    volumes:
+      - supera_enem_postgres_data:/var/lib/postgresql/data
+      - supera_enem_postgres_backup:/backups
+    env_file:
+      - ./.envs/.postgres
+    ports:
+      - "5432:5432"
 
   grafana:
     image: grafana/grafana
