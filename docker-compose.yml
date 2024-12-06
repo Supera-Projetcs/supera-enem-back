@@ -1,13 +1,14 @@
 volumes:
-    supera_enem_postgres_data: {}
-    supera_enem_postgres_backup: {}
-
+  supera_enem_postgres_data: {}
+  supera_enem_postgres_backup: {}
+  keycloak_data: {}
 services:
   postgres:
     build:
-        context: .
-        dockerfile: ./compose/postgres/Dockerfile
-    image: postgres:16
+      context: .
+      dockerfile: ./compose/postgres/Dockerfile
+    image: supera_enem_postgres:latest
+    container_name: supera_enem_postgres
     volumes:
       - supera_enem_postgres_data:/var/lib/postgresql/data
       - supera_enem_postgres_backup:/backups
@@ -20,7 +21,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/spring/Dockerfile
-    image: spring-app:latest
+    image: supera_enem-app:latest
     volumes:
       - .:/app
     environment:
@@ -63,3 +64,22 @@ services:
     links:
       - postgres
       - prometheus
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.5
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/enem
+      - KC_DB_USERNAME=NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA
+      - KC_DB_PASSWORD=3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM
+    command: start-dev
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./scripts/init-keycloak.sql:/docker-entrypoint-initdb.d/init-keycloak.sql
+      - keycloak_data:/opt/keycloak/data
+    depends_on:
+      - postgres
