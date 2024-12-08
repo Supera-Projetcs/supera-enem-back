@@ -2,6 +2,8 @@ volumes:
   supera_enem_postgres_data: {}
   supera_enem_postgres_backup: {}
   keycloak_data: {}
+  minio_data: {}
+  minio_config: {}
 services:
   postgres:
     build:
@@ -40,6 +42,7 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+      - minio
 
   grafana:
     image: grafana/grafana
@@ -83,3 +86,17 @@ services:
       - keycloak_data:/opt/keycloak/data
     depends_on:
       - postgres
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000" #Interface
+      - "9001:9001" #ADM
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+      - minio_config:/root/.minio
