@@ -15,14 +15,25 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(nullable = false, unique = true, name = "keycloak_id")
+    private  String keycloakId;
 
+    @Column(nullable = false, name = "first_name")
+    private String firstName;
+
+    @Column(nullable = false, name = "last_name")
+    private String lastName;
+
+    @Column(nullable = false, name = "dream_course")
     private String dreamCourse;
 
+    @Column(nullable = false)
     private String phone;
 
+    @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false, name = "birth_date")
     private LocalDate birthDate;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -30,7 +41,9 @@ public class Student {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, name = "preferred_study_days")
     private Set<Weekday> preferredStudyDays;
 
+    @Column(name = "is_registered")
     private boolean isRegistered;
 }

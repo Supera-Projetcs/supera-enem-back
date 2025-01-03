@@ -26,12 +26,10 @@ public class KeycloackUserServiceImplematation implements KeycloakUserService {
     @Value("${keycloak.realm-server}")
     private String realm;
     private final Keycloak keycloak;
-    private final UserMapper userMapper;
 
-    // Construtor com injeção do Keycloak e do UserMapper
-    public KeycloackUserServiceImplematation(Keycloak keycloak, UserMapper userMapper) {
+    public KeycloackUserServiceImplematation(Keycloak keycloak) {
         this.keycloak = keycloak;
-        this.userMapper = userMapper;
+
     }
 
     @Override

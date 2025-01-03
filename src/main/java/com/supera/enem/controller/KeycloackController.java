@@ -4,6 +4,7 @@ import com.supera.enem.dto.StudentRegistrationRecord;
 import com.supera.enem.service.keycloak.KeycloakUserService;
 import lombok.AllArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -13,7 +14,8 @@ import java.security.Principal;
 @AllArgsConstructor
 public class KeycloackController {
 
-    private final KeycloakUserService keycloakUserService;
+    @Autowired
+    private KeycloakUserService keycloakUserService;
 
     @PostMapping
     public StudentRegistrationRecord createUser(@RequestBody StudentRegistrationRecord userRegistrationRecord) {
