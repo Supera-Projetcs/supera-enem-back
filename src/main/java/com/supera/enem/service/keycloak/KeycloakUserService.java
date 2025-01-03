@@ -1,7 +1,7 @@
 package com.supera.enem.service.keycloak;
 
-import com.supera.enem.dto.ResetPasswordDTO;
-import com.supera.enem.dto.StudentRegistrationRecord;
+import com.supera.enem.controller.DTOS.ResetPasswordDTO;
+import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.UserRepresentation;
 

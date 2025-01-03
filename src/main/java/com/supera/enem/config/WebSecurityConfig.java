@@ -1,4 +1,4 @@
-package com.supera.enem.configs.security;
+package com.supera.enem.config;
 
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @KeycloakConfiguration
 @EnableMethodSecurity(prePostEnabled = true)
-public class KeycloakSecurityConfig {
+public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

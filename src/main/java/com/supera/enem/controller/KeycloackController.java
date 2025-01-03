@@ -1,6 +1,6 @@
 package com.supera.enem.controller;
 
-import com.supera.enem.dto.StudentRegistrationRecord;
+import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
 import com.supera.enem.service.keycloak.KeycloakUserService;
 import lombok.AllArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;

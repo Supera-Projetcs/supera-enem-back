@@ -1,4 +1,4 @@
-package com.supera.enem.domains;
+package com.supera.enem.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 

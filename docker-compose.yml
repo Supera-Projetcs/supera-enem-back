@@ -19,30 +19,30 @@ services:
     ports:
       - "5432:5432"
 
-  app:
-    build:
-      context: .
-      dockerfile: ./compose/spring/Dockerfile
-    image: supera_enem-app:latest
-    volumes:
-      - .:/app
-    environment:
-      - DOTENV_PATH=.envs/.spring
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/enem
-      - SPRING_DATASOURCE_USERNAME=NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA
-      - SPRING_DATASOURCE_PASSWORD=3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_JPA_SHOW_SQL=true
-      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
-      - SPRING_JPA_PROPERTIES_HIBERNATE_USE_SQL_COMMENTS=true
-    env_file:
-      - ./.envs/.spring
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - minio
+#  app:
+#    build:
+#      context: .
+#      dockerfile: ./compose/spring/Dockerfile
+#    image: supera_enem-app:latest
+#    volumes:
+#      - .:/app
+#    environment:
+#      - DOTENV_PATH=.envs/.spring
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/enem
+#      - SPRING_DATASOURCE_USERNAME=NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA
+#      - SPRING_DATASOURCE_PASSWORD=3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+#      - SPRING_JPA_SHOW_SQL=true
+#      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+#      - SPRING_JPA_PROPERTIES_HIBERNATE_USE_SQL_COMMENTS=true
+#    env_file:
+#      - ./.envs/.spring
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - postgres
+#      - minio
 
   grafana:
     image: grafana/grafana

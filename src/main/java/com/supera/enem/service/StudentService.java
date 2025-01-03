@@ -1,6 +1,6 @@
 package com.supera.enem.service;
 
-import com.supera.enem.domains.Student;
+import com.supera.enem.domain.Student;
 import com.supera.enem.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 

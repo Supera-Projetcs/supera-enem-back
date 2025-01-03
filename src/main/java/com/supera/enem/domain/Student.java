@@ -1,6 +1,6 @@
-package com.supera.enem.domains;
+package com.supera.enem.domain;
 
-import com.supera.enem.domains.enums.Weekday;
+import com.supera.enem.domain.enums.Weekday;
 import jakarta.persistence.*;
 import lombok.Data;
 

@@ -1,8 +1,8 @@
 package com.supera.enem.service.keycloak;
 
-import com.supera.enem.dto.ResetPasswordDTO;
-import com.supera.enem.dto.StudentRegistrationRecord;
-import com.supera.enem.mapper.UserMapper;
+import com.supera.enem.controller.DTOS.ResetPasswordDTO;
+import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
+
 import lombok.extern.slf4j.Slf4j;
 import jakarta.ws.rs.core.Response;
 

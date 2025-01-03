@@ -1,4 +1,4 @@
-package com.supera.enem.dto;
+package com.supera.enem.controller.DTOS;
 import lombok.Data;
 
 @Data
