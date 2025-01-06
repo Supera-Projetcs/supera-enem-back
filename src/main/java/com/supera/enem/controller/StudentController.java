@@ -1,5 +1,6 @@
 package com.supera.enem.controller;
 
+import com.supera.enem.controller.DTOS.StudentDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.service.StudentService;
 import jakarta.validation.Valid;
@@ -24,8 +25,14 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<Student> createStudent(@RequestBody @Valid Student student) {
+    public ResponseEntity<Student> createStudent(@RequestBody @Valid StudentDTO student) {
         Student createdStudent = studentService.createStudent(student);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
+        Student student = studentService.getStudentById(id);
+        return ResponseEntity.ok(student);
     }
 }
