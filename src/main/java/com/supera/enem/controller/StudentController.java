@@ -18,19 +18,13 @@ public class StudentController {
     private  StudentService studentService;
 
 
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<Student>> getAllStudents() {
         List<Student> students = studentService.getAllStudents();
         return ResponseEntity.ok(students);
     }
 
-    @PostMapping
-    public ResponseEntity<Student> createStudent(@RequestBody @Valid StudentDTO student) {
-        Student createdStudent = studentService.createStudent(student);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
-    }
-
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/")
     public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
         Student student = studentService.getStudentById(id);
         return ResponseEntity.ok(student);
