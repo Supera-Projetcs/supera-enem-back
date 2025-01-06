@@ -7,7 +7,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 public interface KeycloakUserService {
 
-    StudentRegistrationRecord createUser(StudentRegistrationRecord userRegistrationRecord);
+    String createUser(StudentRegistrationRecord userRegistrationRecord);
     UserRepresentation getUserById(String userId);
     void deleteUserById(String userId);
     void emailVerification(String userId);

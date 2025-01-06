@@ -16,5 +16,6 @@ public class StudentDTO {
     private String email;
     private LocalDate birthDate;
     private AddressDTO address;
+    private String password;
     private Set<Weekday> preferredStudyDays;
 }
