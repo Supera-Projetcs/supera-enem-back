@@ -21,4 +21,10 @@ public class TestService {
                 .map(testMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public TestResponseDTO getTestById(Long id) {
+        Test test = testRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Test not found with id: " + id));
+        return testMapper.toDTO(test);
+    }
 }
