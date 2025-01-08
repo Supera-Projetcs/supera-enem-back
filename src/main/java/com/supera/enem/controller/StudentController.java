@@ -1,6 +1,6 @@
 package com.supera.enem.controller;
 
-import com.supera.enem.controller.DTOS.StudentDTO;
+import com.supera.enem.controller.DTOS.UpdateStudentDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.service.StudentService;
 import jakarta.validation.Valid;
@@ -22,6 +22,17 @@ public class StudentController {
     public ResponseEntity<List<Student>> getAllStudents() {
         List<Student> students = studentService.getAllStudents();
         return ResponseEntity.ok(students);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Student> partialUpdateStudent(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateStudentDTO studentDTO) {
+
+
+        Student updatedStudent = studentService.updateStudent(id, studentDTO );
+
+        return ResponseEntity.status(HttpStatus.OK).body(updatedStudent);
     }
 
     @GetMapping("/{id}/")

@@ -2,11 +2,14 @@ package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.StudentDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
+import com.supera.enem.controller.DTOS.UpdateStudentDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.mapper.StudentMapper;
 
 import com.supera.enem.mapper.UserKeycloakMapper;
 import com.supera.enem.repository.StudentRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +37,18 @@ public class StudentService {
 
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
+    }
+
+    public Student updateStudent (Long id, UpdateStudentDTO studentDTO) {
+        Student existingStudent = getStudentById(id);
+
+        if (existingStudent == null) {
+            throw new IllegalArgumentException("Estudante não existe.");
+        }
+
+        studentMapper.updateStudentFromDTO(studentDTO, existingStudent);
+
+        return studentRepository.save(existingStudent);
     }
 
     private void validatePassword(String password) {

@@ -1,10 +1,12 @@
 package com.supera.enem.mapper;
 
 import com.supera.enem.controller.DTOS.StudentDTO;
+import com.supera.enem.controller.DTOS.UpdateStudentDTO;
 import com.supera.enem.domain.Student;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 
@@ -14,4 +16,7 @@ public interface StudentMapper {
 
     @Mapping(target = "address", source = "address")
     Student toStudent(StudentDTO studentDTO);
+
+    @Mapping(target = "id", ignore = true)  // Ignora o ID durante a atualização
+    void updateStudentFromDTO(UpdateStudentDTO studentDTO, @MappingTarget Student student);
 }
