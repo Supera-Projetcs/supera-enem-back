@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,7 +26,6 @@ public class Performance {
     @Column(name = "performance_rate", nullable = false)
     private Double performanceRate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 }

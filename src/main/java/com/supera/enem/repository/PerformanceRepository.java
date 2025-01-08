@@ -9,7 +9,7 @@ import com.supera.enem.domain.Performance;
 import java.util.List;
 
 @Repository
-public interface PerformanceRepository extends JpaRepository<PerformanceRepository, Long> {
+public interface PerformanceRepository extends JpaRepository<Performance, Long> {
 
     @Query("SELECT s.name AS subjectName, AVG(p.performanceRate) AS avgPerformance " +
             "FROM Performance p " +
