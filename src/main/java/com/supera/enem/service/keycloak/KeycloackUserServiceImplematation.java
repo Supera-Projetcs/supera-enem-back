@@ -1,8 +1,9 @@
 package com.supera.enem.service.keycloak;
 
-import com.supera.enem.dto.ResetPasswordDTO;
-import com.supera.enem.dto.StudentRegistrationRecord;
-import com.supera.enem.mapper.UserMapper;
+import com.supera.enem.controller.DTOS.ResetPasswordDTO;
+import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
+
+import com.supera.enem.execpetion.KeycloakException;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.ws.rs.core.Response;
 
@@ -33,7 +34,7 @@ public class KeycloackUserServiceImplematation implements KeycloakUserService {
     }
 
     @Override
-    public StudentRegistrationRecord createUser(StudentRegistrationRecord userRegistrationRecord) {
+    public String createUser(StudentRegistrationRecord userRegistrationRecord) {
 
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
@@ -53,23 +54,31 @@ public class KeycloackUserServiceImplematation implements KeycloakUserService {
         List<CredentialRepresentation> list = new ArrayList<>();
         list.add(credentialRepresentation);
         user.setCredentials(list);
+        System.out.println("Olá");
         UsersResource usersResource = getUsersResource();
+        System.out.println("Olá");
         Response response = usersResource.create(user);
+
 
         if(Objects.equals(201,response.getStatus())){
 
             List<UserRepresentation> representationList = usersResource.searchByUsername(userRegistrationRecord.username(), true);
+
             if(!CollectionUtils.isEmpty(representationList)){
+
                 UserRepresentation userRepresentation1 = representationList.stream().filter(userRepresentation -> Objects.equals(false, userRepresentation.isEmailVerified())).findFirst().orElse(null);
-                assert userRepresentation1 != null;
-                emailVerification(userRepresentation1.getId());
+                System.out.println("ID: " + userRepresentation1.getId());
+
+                return userRepresentation1.getId();
+
             }
-            return  userRegistrationRecord;
+
+        }else{
+            String errorMessage = response.readEntity(String.class);
+            throw new KeycloakException("Erro ao criar usuário no Keycloak: " + errorMessage);
         }
 
-//        response.readEntity()
-
-        return null;
+        throw new KeycloakException("Erro desconhecido ao criar usuário no Keycloak.");
     }
 
 

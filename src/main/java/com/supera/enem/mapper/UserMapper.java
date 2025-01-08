@@ -1,7 +1,7 @@
 package com.supera.enem.mapper;
 
 
-import com.supera.enem.dto.StudentRegistrationRecord;
+import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package com.supera.enem.dto;
+package com.supera.enem.controller.DTOS;
 import lombok.Data;
 
 @Data
@@ -7,5 +7,5 @@ public class AddressDTO {
     private String city;
     private String state;
     private String zipCode;
-    private String country;
+    private String houseNumber;
 }

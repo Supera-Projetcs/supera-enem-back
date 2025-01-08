@@ -1,4 +1,4 @@
-package com.supera.enem.configs.security;
+package com.supera.enem.config;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;

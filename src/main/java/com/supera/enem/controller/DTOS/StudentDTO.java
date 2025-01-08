@@ -1,6 +1,6 @@
-package com.supera.enem.dto;
+package com.supera.enem.controller.DTOS;
 
-import com.supera.enem.domains.enums.Weekday;
+import com.supera.enem.domain.enums.Weekday;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -16,5 +16,6 @@ public class StudentDTO {
     private String email;
     private LocalDate birthDate;
     private AddressDTO address;
+    private String password;
     private Set<Weekday> preferredStudyDays;
 }

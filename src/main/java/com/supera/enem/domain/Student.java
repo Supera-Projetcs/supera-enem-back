@@ -1,6 +1,6 @@
-package com.supera.enem.domains;
+package com.supera.enem.domain;
 
-import com.supera.enem.domains.enums.Weekday;
+import com.supera.enem.domain.enums.Weekday;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -40,8 +40,9 @@ public class Student {
     private Address address;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, name = "preferred_study_days")
+    @CollectionTable(name = "student_preferredstudydays",
+            joinColumns = @JoinColumn(name = "student_id"))
+    @Column(name = "preferred_study_day")
     private Set<Weekday> preferredStudyDays;
 
     @Column(name = "is_registered")
