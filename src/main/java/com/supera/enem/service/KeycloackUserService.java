@@ -67,15 +67,31 @@ public class KeycloackUserService {
         throw new KeycloakException("Erro desconhecido ao criar usuário no Keycloak.");
     }
 
+    public void updateEmail(String userId, String newEmail) {
+        UsersResource usersResource = getUsersResource();
+
+        UserResource userResource = usersResource.get(userId);
+
+        if (userResource == null) {
+            throw new IllegalArgumentException("Usuário não encontrado no keycloak.");
+        }
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+
+
+        if (newEmail != null && !newEmail.isEmpty()) {
+            userRepresentation.setEmail(newEmail);
+            userRepresentation.setEmailVerified(false);
+            userResource.update(userRepresentation);
+
+        } else {
+            throw new IllegalArgumentException("O e-mail fornecido é inválido.");
+        }
+    }
+
 
     private UsersResource getUsersResource() {
         RealmResource realmResource = keycloak.realm(realm);
         return realmResource.users();
-    }
-
-    public UserResource getUserResource(String userId) {
-        UsersResource usersResource = getUsersResource();
-        return usersResource.get(userId);
     }
 
 }

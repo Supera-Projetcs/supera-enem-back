@@ -1,6 +1,7 @@
 package com.supera.enem.controller;
 
 import com.supera.enem.controller.DTOS.UpdateStudentDTO;
+import com.supera.enem.controller.DTOS.UpdateEmailDto;
 import com.supera.enem.domain.Student;
 import com.supera.enem.service.StudentService;
 import jakarta.validation.Valid;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class StudentController {
     @Autowired
-    private  StudentService studentService;
+    private StudentService studentService;
 
 
     @GetMapping("/")
@@ -33,6 +34,13 @@ public class StudentController {
         Student updatedStudent = studentService.updateStudent(id, studentDTO );
 
         return ResponseEntity.status(HttpStatus.OK).body(updatedStudent);
+    }
+
+    @PutMapping("/{id}/email")
+    public ResponseEntity<Void> updateEmail(@PathVariable Long id, @RequestBody UpdateEmailDto dto) {
+        System.out.println(dto);
+        studentService.updateEmailStudent(id, dto.getEmail());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}/")
