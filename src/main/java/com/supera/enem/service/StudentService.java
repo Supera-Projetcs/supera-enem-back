@@ -1,13 +1,12 @@
 package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.StudentDTO;
-import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
+import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 import com.supera.enem.domain.Student;
-import com.supera.enem.domain.Address;
+import com.supera.enem.mapper.StudentMapper;
 
+import com.supera.enem.mapper.UserKeycloakMapper;
 import com.supera.enem.repository.StudentRepository;
-import com.supera.enem.service.keycloak.KeycloackUserServiceImplematation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +16,15 @@ import java.util.List;
 public class StudentService {
 
     private final StudentRepository studentRepository;
-    @Autowired
-    private KeycloackUserServiceImplematation keycloakImplematation;
-    public StudentService(StudentRepository studentRepository) {
+    private final KeycloackUserService keycloakImplemantation;
+    private final StudentMapper studentMapper;
+    private final UserKeycloakMapper userKeycloakMapper;
+
+    public StudentService(StudentRepository studentRepository, KeycloackUserService keycloakImplemantation) {
         this.studentRepository = studentRepository;
+        this.keycloakImplemantation = keycloakImplemantation;
+        this.studentMapper = StudentMapper.INSTANCE;
+        this.userKeycloakMapper = UserKeycloakMapper.INSTANCE;
     }
 
     public Student getStudentById(Long id) {
@@ -32,47 +36,46 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
-    public Student createStudent(StudentDTO studentRecord) {
+    private void validatePassword(String password) {
+        if (password.length() < 3) {
+            throw new IllegalArgumentException("A senha deve ter pelo menos 3 caracteres.");
+        }
+        if (!password.matches(".*\\d.*")) { // Verifica se contém pelo menos um número
+            throw new IllegalArgumentException("A senha deve conter pelo menos 1 número.");
+        }
+        if (!password.matches(".*[A-Z].*")) { // Verifica se contém pelo menos uma letra maiúscula
+            throw new IllegalArgumentException("A senha deve conter pelo menos uma letra maiúscula.");
+        }
+        if (!password.matches(".*[@#!$%^&*].*")) { // Verifica se contém pelo menos um símbolo
+            throw new IllegalArgumentException("A senha deve conter pelo menos um símbolo.");
+        }
+    }
 
+    public Student createStudent(StudentDTO studentRecord) {
         if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Estudante com este e-mail já existe.");
         }
 
-        // Criar usuário no keycloak e pegar o id
-        StudentRegistrationRecord userKeycloakRecord = new StudentRegistrationRecord(
-                studentRecord.getUsername(),
-                studentRecord.getEmail(),
-                studentRecord.getFirstName(),
-                studentRecord.getLastName(),
-                studentRecord.getPassword()
-        );
+        if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Estudante com este username já existe.");
+        }
 
-        String keycloakUserId = keycloakImplematation.createUser(userKeycloakRecord);
+        if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException("E-mail inválido.");
+        }
+
+        validatePassword(studentRecord.getPassword());
+
+        UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
+        String keycloakUserId = keycloakImplemantation.createUser(userKeycloakRecord);
+
+
         if (keycloakUserId == null) {
             throw new IllegalStateException("Erro ao criar usuário no Keycloak.");
         }
 
-        //Criar endereço
-        Address address = new Address();
-        address.setStreet(studentRecord.getAddress().getStreet());
-        address.setCity(studentRecord.getAddress().getCity());
-        address.setState(studentRecord.getAddress().getState());
-        address.setZipCode(studentRecord.getAddress().getZipCode());
-        address.setHouseNumber(studentRecord.getAddress().getHouseNumber());
-
-        //Criar estudante
-        Student student = new Student();
+        Student student = studentMapper.toStudent(studentRecord);
         student.setKeycloakId(keycloakUserId);
-        student.setFirstName(studentRecord.getFirstName());
-        student.setLastName(studentRecord.getLastName());
-        student.setDreamCourse(studentRecord.getDreamCourse());
-        student.setPhone(studentRecord.getPhone());
-        student.setEmail(studentRecord.getEmail());
-        student.setBirthDate(studentRecord.getBirthDate());
-        student.setAddress(address);
-        student.setPreferredStudyDays(studentRecord.getPreferredStudyDays());
-        student.setRegistered(true);
-
         return studentRepository.save(student);
     }
 

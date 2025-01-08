@@ -1,7 +1,5 @@
-package com.supera.enem.service.keycloak;
-
-import com.supera.enem.controller.DTOS.ResetPasswordDTO;
-import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
+package com.supera.enem.service;
+import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
 import com.supera.enem.execpetion.KeycloakException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,55 +20,43 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class KeycloackUserServiceImplematation implements KeycloakUserService {
+public class KeycloackUserService {
 
     @Value("${keycloak.realm-server}")
     private String realm;
     private final Keycloak keycloak;
 
-    public KeycloackUserServiceImplematation(Keycloak keycloak) {
+    public KeycloackUserService(Keycloak keycloak) {
         this.keycloak = keycloak;
 
     }
 
-    @Override
-    public String createUser(StudentRegistrationRecord userRegistrationRecord) {
-
+    public String createUser(UseKeycloakRegistrationDTO userRegistrationRecord) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
-        user.setUsername(userRegistrationRecord.username());
-        user.setEmail(userRegistrationRecord.email());
-        user.setFirstName(userRegistrationRecord.firstName());
-        user.setLastName(userRegistrationRecord.lastName());
+        user.setUsername(userRegistrationRecord.getUsername());
+        user.setEmail(userRegistrationRecord.getEmail());
+        user.setFirstName(userRegistrationRecord.getFirstName());
+        user.setLastName(userRegistrationRecord.getLastName());
         user.setEmailVerified(false);
 
-
         CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-        credentialRepresentation.setValue(userRegistrationRecord.password());
+        credentialRepresentation.setValue(userRegistrationRecord.getPassword());
         credentialRepresentation.setTemporary(false);
         credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
-
 
         List<CredentialRepresentation> list = new ArrayList<>();
         list.add(credentialRepresentation);
         user.setCredentials(list);
-        System.out.println("Olá");
         UsersResource usersResource = getUsersResource();
-        System.out.println("Olá");
         Response response = usersResource.create(user);
 
-
         if(Objects.equals(201,response.getStatus())){
-
-            List<UserRepresentation> representationList = usersResource.searchByUsername(userRegistrationRecord.username(), true);
-
+            List<UserRepresentation> representationList = usersResource.searchByUsername(userRegistrationRecord.getUsername(), true);
             if(!CollectionUtils.isEmpty(representationList)){
-
                 UserRepresentation userRepresentation1 = representationList.stream().filter(userRepresentation -> Objects.equals(false, userRepresentation.isEmailVerified())).findFirst().orElse(null);
                 System.out.println("ID: " + userRepresentation1.getId());
-
                 return userRepresentation1.getId();
-
             }
 
         }else{
@@ -87,42 +73,9 @@ public class KeycloackUserServiceImplematation implements KeycloakUserService {
         return realmResource.users();
     }
 
-    @Override
-    public UserRepresentation getUserById(String userId) {
-        return getUsersResource().get(userId).toRepresentation();
-    }
-
-    @Override
-    public void deleteUserById(String userId) {
-        getUsersResource().delete(userId);
-    }
-
-    @Override
-    public void emailVerification(String userId) {
-        UsersResource usersResource = getUsersResource();
-        usersResource.get(userId).sendVerifyEmail();
-    }
-
     public UserResource getUserResource(String userId) {
         UsersResource usersResource = getUsersResource();
         return usersResource.get(userId);
     }
 
-    @Override
-    public void updatePassword(String userId) {
-        UserResource userResource = getUserResource(userId);
-        List<String> actions = new ArrayList<>();
-        actions.add("UPDATE_PASSWORD");
-        userResource.executeActionsEmail(actions);
-    }
-
-    @Override
-    public void updatePassword(ResetPasswordDTO resetPassword, String userId) {
-        UserResource userResource = getUserResource(userId);
-        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-        credentialRepresentation.setValue(resetPassword.password());
-        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
-        credentialRepresentation.setTemporary(false);
-        userResource.resetPassword(credentialRepresentation);
-    }
 }
