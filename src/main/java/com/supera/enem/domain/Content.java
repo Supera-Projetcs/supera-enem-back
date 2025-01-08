@@ -19,5 +19,4 @@ public class Content {
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
-
 }
