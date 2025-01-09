@@ -22,7 +22,6 @@ public class Content {
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
-
     @ManyToMany(mappedBy = "contents")
     private Set<WeeklyReport> weeklyReports;
 }
