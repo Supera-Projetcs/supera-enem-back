@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 public class Content {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private double content_weight;

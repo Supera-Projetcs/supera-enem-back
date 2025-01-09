@@ -1,4 +1,4 @@
-package com.supera.enem.execpetion;
+package com.supera.enem.exception;
 
 public class KeycloakException extends RuntimeException {
 

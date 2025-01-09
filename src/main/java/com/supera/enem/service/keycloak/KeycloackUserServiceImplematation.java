@@ -3,7 +3,7 @@ package com.supera.enem.service.keycloak;
 import com.supera.enem.controller.DTOS.ResetPasswordDTO;
 import com.supera.enem.controller.DTOS.StudentRegistrationRecord;
 
-import com.supera.enem.execpetion.KeycloakException;
+import com.supera.enem.exception.KeycloakException;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.ws.rs.core.Response;
 
