@@ -1,23 +1,15 @@
 package com.supera.enem.domain;
-import com.supera.enem.domain.enums.TestType;
+
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Date;
+import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-public class Test {
-
+public class WeeklyReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TestType type;
 
     @Temporal(TemporalType.DATE)
     @Column(nullable = false)
@@ -26,4 +18,12 @@ public class Test {
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
+
+    @ManyToMany
+    @JoinTable(
+            name = "weekly_report_content",
+            joinColumns = @JoinColumn(name = "weekly_report_id"),
+            inverseJoinColumns = @JoinColumn(name = "content_id")
+    )
+    private Set<Content> contents;
 }

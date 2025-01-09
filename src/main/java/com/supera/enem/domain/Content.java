@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Getter
 @Setter
@@ -20,4 +22,7 @@ public class Content {
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
+
+    @ManyToMany(mappedBy = "contents")
+    private Set<WeeklyReport> weeklyReports;
 }
