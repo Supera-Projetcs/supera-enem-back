@@ -1,8 +1,8 @@
 package com.supera.enem.service;
 
-import com.supera.enem.controller.DTOS.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.*;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
-import com.supera.enem.controller.DTOS.UpdateStudentDTO;
+
 import com.supera.enem.domain.Student;
 import com.supera.enem.mapper.StudentMapper;
 
@@ -55,6 +55,21 @@ public class StudentService {
         studentRepository.save(student);
     }
 
+    public void updateUsernameStudent(Long id, String username) {
+        Student student = getStudentById(id);
+
+        if (username == null || username.isEmpty()) throw new IllegalArgumentException("Username é obrigatório.");
+
+        Optional<Student> existingStudentWithEmail = studentRepository.findByUsername(username);
+        if (existingStudentWithEmail.isPresent() && !existingStudentWithEmail.get().getId().equals(id))
+            throw new IllegalArgumentException("Este username já está sendo usado por outro estudante.");
+
+        keycloakService.updateUsername(student.getKeycloakId(), username);
+
+        student.setUsername(username);
+        studentRepository.save(student);
+    }
+
     public Student updateStudent (Long id, UpdateStudentDTO studentDTO) {
         Student existingStudent = getStudentById(id);
 
@@ -63,6 +78,18 @@ public class StudentService {
         studentMapper.updateStudentFromDTO(studentDTO, existingStudent);
 
         return studentRepository.save(existingStudent);
+    }
+
+
+    public Student getStudentLogged(String token){
+        String keycloakId = keycloakService.getKeycloakIdByToken(token);
+        Optional<Student> student = studentRepository.findByKeycloakId(keycloakId);
+
+        if(student.isPresent()){
+            return student.get();
+        }else{
+            throw new IllegalArgumentException("Usuário não encontrado.");
+        }
     }
 
     private void validatePassword(String password) {

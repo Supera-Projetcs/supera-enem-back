@@ -1,6 +1,6 @@
 package com.supera.enem;
 
-import com.supera.enem.controller.DTOS.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentDTO;
 import com.supera.enem.controller.DTOS.AddressDTO;
 import com.supera.enem.service.StudentService;
 import com.supera.enem.service.KeycloackUserService;

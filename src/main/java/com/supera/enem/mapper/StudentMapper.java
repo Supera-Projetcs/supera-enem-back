@@ -1,7 +1,7 @@
 package com.supera.enem.mapper;
 
-import com.supera.enem.controller.DTOS.StudentDTO;
-import com.supera.enem.controller.DTOS.UpdateStudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.UpdateStudentDTO;
 import com.supera.enem.domain.Student;
 
 import org.mapstruct.Mapper;

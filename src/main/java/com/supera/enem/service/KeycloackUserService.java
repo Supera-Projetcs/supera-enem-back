@@ -1,4 +1,5 @@
 package com.supera.enem.service;
+import com.supera.enem.controller.DTOS.Student.UpdatePasswordDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
 import com.supera.enem.execpetion.KeycloakException;
@@ -12,7 +13,8 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
+import org.keycloak.TokenVerifier;
+import org.keycloak.representations.AccessToken;
 import java.util.*;
 
 import java.util.ArrayList;
@@ -67,6 +69,7 @@ public class KeycloackUserService {
         throw new KeycloakException("Erro desconhecido ao criar usuário no Keycloak.");
     }
 
+
     public void updateEmail(String userId, String newEmail) {
         UsersResource usersResource = getUsersResource();
 
@@ -88,6 +91,44 @@ public class KeycloackUserService {
         }
     }
 
+    public void updateUsername(String userId, String username) {
+        UsersResource usersResource = getUsersResource();
+        UserResource userResource = usersResource.get(userId);
+
+        if (userResource == null) {
+            throw new IllegalArgumentException("Usuário não encontrado no keycloak.");
+        }
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+
+        if (username != null && !username.isEmpty()) {
+            userRepresentation.setUsername(username);
+            userResource.update(userRepresentation);
+        } else {
+            throw new IllegalArgumentException("O e-mail fornecido é inválido.");
+        }
+    }
+
+    public String getKeycloakIdByToken(String token) {
+        try {
+            AccessToken accessToken = TokenVerifier.create(token.replace("Bearer ", ""), AccessToken.class).getToken();
+            return accessToken.getSubject();
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Token inválido.", e);
+        }
+    }
+
+    public void updatePassword(String userId, UpdatePasswordDTO passwordDTO) {
+        UsersResource usersResource = getUsersResource();
+        UserResource userResource = usersResource.get(userId);
+
+        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+        credentialRepresentation.setValue(passwordDTO.getNewPassword());
+        credentialRepresentation.setTemporary(false);
+
+        userResource.resetPassword(credentialRepresentation);
+    }
 
     private UsersResource getUsersResource() {
         RealmResource realmResource = keycloak.realm(realm);
