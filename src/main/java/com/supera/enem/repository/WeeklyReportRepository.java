@@ -10,4 +10,5 @@ public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, Long
 
     List<WeeklyReport> findByStudent(Student student);
 
+    WeeklyReport findByIdAndStudent(Long id, Student student);
 }

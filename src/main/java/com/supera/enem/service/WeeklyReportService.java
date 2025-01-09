@@ -20,4 +20,8 @@ public class WeeklyReportService {
     public List<WeeklyReport> getWeeklyReportsByStudent(Student student) {
         return weeklyReportRepository.findByStudent(student);
     }
+
+    public WeeklyReport getWeeklyReportById(Long id, Student student) {
+        return weeklyReportRepository.findByIdAndStudent(id, student);
+    }
 }
