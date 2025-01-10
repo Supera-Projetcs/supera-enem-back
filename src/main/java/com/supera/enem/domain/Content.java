@@ -1,6 +1,7 @@
 package com.supera.enem.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,5 +24,6 @@ public class Content {
     private Subject subject;
 
     @ManyToMany(mappedBy = "contents")
+    @JsonBackReference
     private Set<WeeklyReport> weeklyReports;
 }

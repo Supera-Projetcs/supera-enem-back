@@ -3,10 +3,15 @@ package com.supera.enem.controller;
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
+import com.supera.enem.repository.StudentRepository;
+import com.supera.enem.repository.WeeklyReportRepository;
 import com.supera.enem.service.WeeklyReportService;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,14 +26,24 @@ import java.util.stream.Collectors;
 public class WeeklyReportController {
     @Autowired
     private WeeklyReportService weeklyReportService;
+    @Autowired
+    private StudentRepository studentRepository;
 
     @GetMapping
-    public List<WeeklyReportDTO> getAllWeeklyReportsByStudent(@AuthenticationPrincipal Student student) {
-        List<WeeklyReport> weeklyReports = weeklyReportService.getWeeklyReportsByStudent(student);
+    public List<WeeklyReportDTO> getAllWeeklyReportsByStudent() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            String keycloakId = jwt.getClaim("sub");
+            Student student = studentRepository.findByKeycloakId(keycloakId);
+            List<WeeklyReport> weeklyReports = weeklyReportService.getWeeklyReportsByStudent(student);
 
-        return weeklyReports.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+            return weeklyReports.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
     }
 
     @GetMapping("/{id}")
@@ -46,7 +61,7 @@ public class WeeklyReportController {
         dto.setId(weeklyReport.getId());
         dto.setStudentId(weeklyReport.getStudent().getId());
         dto.setDate(weeklyReport.getDate());
-
+        dto.setContents(weeklyReport.getContents());
         return dto;
     }
 }

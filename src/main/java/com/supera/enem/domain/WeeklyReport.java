@@ -1,10 +1,12 @@
 package com.supera.enem.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -29,5 +31,8 @@ public class WeeklyReport {
             joinColumns = @JoinColumn(name = "weekly_report_id"),
             inverseJoinColumns = @JoinColumn(name = "content_id")
     )
+    @JsonManagedReference
     private Set<Content> contents;
+
+
 }

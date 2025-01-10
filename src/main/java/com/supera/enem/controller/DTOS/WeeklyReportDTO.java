@@ -1,5 +1,6 @@
 package com.supera.enem.controller.DTOS;
 
+import com.supera.enem.domain.Content;
 import lombok.Data;
 
 import java.util.Date;
@@ -10,5 +11,5 @@ public class WeeklyReportDTO {
     private Long id;
     private Date date;
     private Long studentId;
-    private Set<Long> contentsIds;
+    private Set<Content> contents;
 }
