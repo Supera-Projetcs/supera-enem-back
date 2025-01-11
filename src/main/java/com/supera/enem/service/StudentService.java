@@ -39,7 +39,7 @@ public class StudentService {
     }
 
 
-    public void updateEmailStudent(Long id, String newEmail) {
+    public Student updateEmailStudent(Long id, String newEmail) {
         Student student = getStudentById(id);
 
         if (newEmail == null || newEmail.isEmpty()) throw new IllegalArgumentException("E-mail não pode ser nulo.");
@@ -52,10 +52,10 @@ public class StudentService {
 
         keycloakService.updateEmail(student.getKeycloakId(), newEmail);
         student.setEmail(newEmail);
-        studentRepository.save(student);
+        return studentRepository.save(student);
     }
 
-    public void updateUsernameStudent(Long id, String username) {
+    public Student updateUsernameStudent(Long id, String username) {
         Student student = getStudentById(id);
 
         if (username == null || username.isEmpty()) throw new IllegalArgumentException("Username é obrigatório.");
@@ -67,7 +67,7 @@ public class StudentService {
         keycloakService.updateUsername(student.getKeycloakId(), username);
 
         student.setUsername(username);
-        studentRepository.save(student);
+        return studentRepository.save(student);
     }
 
     public Student updateStudent (Long id, UpdateStudentDTO studentDTO) {

@@ -40,11 +40,12 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedStudent);
     }
 
-    @PutMapping("/{id}/email")
-    public ResponseEntity<Void> updateEmail(@PathVariable Long id, @RequestBody UpdateEmailDTO dto) {
+    @PatchMapping("/{id}/email")
+    public ResponseEntity<Student> updateEmail(@PathVariable Long id, @RequestBody UpdateEmailDTO dto) {
         System.out.println(dto);
-        studentService.updateEmailStudent(id, dto.getEmail());
-        return ResponseEntity.ok().build();
+        Student updatedStudent = studentService.updateEmailStudent(id, dto.getEmail());
+
+        return ResponseEntity.status(HttpStatus.OK).body(updatedStudent);
     }
 
     @PutMapping("/{id}/username")
