@@ -18,6 +18,9 @@ public class Student {
     @Column(nullable = false, unique = true, name = "keycloak_id")
     private  String keycloakId;
 
+    @Column(nullable = false, unique = true)
+    private String username;
+
     @Column(nullable = false, name = "first_name")
     private String firstName;
 
@@ -45,6 +48,5 @@ public class Student {
     @Column(name = "preferred_study_day")
     private Set<Weekday> preferredStudyDays;
 
-    @Column(name = "is_registered")
-    private boolean isRegistered;
+
 }
