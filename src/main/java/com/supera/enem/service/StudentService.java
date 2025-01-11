@@ -83,13 +83,10 @@ public class StudentService {
 
     public Student getStudentLogged(String token){
         String keycloakId = keycloakService.getKeycloakIdByToken(token);
-        Optional<Student> student = studentRepository.findByKeycloakId(keycloakId);
+        Student student = studentRepository.findByKeycloakId(keycloakId);
 
-        if(student.isPresent()){
-            return student.get();
-        }else{
-            throw new IllegalArgumentException("Usuário não encontrado.");
-        }
+        return student;
+
     }
 
     private void validatePassword(String password) {

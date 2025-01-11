@@ -22,10 +22,13 @@ public class Question {
     private String text;
     private char answer;
 
-    @ElementCollection
-    @CollectionTable(name = "question_images", joinColumns = @JoinColumn(name = "question_id"))
-    @Column(name = "image")
-    private List<String> images;
+//    @ElementCollection
+//    @CollectionTable(name = "question_images", joinColumns = @JoinColumn(name = "question_id"))
+//    @Column(name = "image")
+//    private List<String> images;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
 
     @Lob
     @Column(columnDefinition = "TEXT")

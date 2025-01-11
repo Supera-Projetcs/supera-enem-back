@@ -1,15 +1,19 @@
 package com.supera.enem.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 public class Content {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private double content_weight;
@@ -19,5 +23,7 @@ public class Content {
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
-
+    @ManyToMany(mappedBy = "contents")
+    @JsonBackReference
+    private Set<WeeklyReport> weeklyReports;
 }

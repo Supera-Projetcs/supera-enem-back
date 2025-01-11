@@ -2,7 +2,7 @@ package com.supera.enem.service;
 import com.supera.enem.controller.DTOS.Student.UpdatePasswordDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
-import com.supera.enem.execpetion.KeycloakException;
+import com.supera.enem.exception.KeycloakException;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.ws.rs.core.Response;
 
