@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -37,6 +38,14 @@ public class Question {
     @Transient
     private Map<String, String> answers;
 
+    @ManyToMany
+    @JoinTable(
+            name = "question_contents",
+            joinColumns = @JoinColumn(name = "question_id"),
+            inverseJoinColumns = @JoinColumn(name = "content_id")
+    )
+    private Set<Content> contents;
+
     @PrePersist
     @PreUpdate
     private void serializeAnswers() throws IOException {
@@ -52,6 +61,16 @@ public class Question {
             ObjectMapper mapper = new ObjectMapper();
             this.answers = mapper.readValue(this.answersJson, new TypeReference<Map<String, String>>() {});
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Question{" +
+                "id=" + id +
+                ", text='" + text + '\'' +
+                ", answer=" + answer +
+                ", answers=" + answers +
+                '}';
     }
 
 }

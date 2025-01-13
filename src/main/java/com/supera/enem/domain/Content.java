@@ -26,4 +26,8 @@ public class Content {
     @ManyToMany(mappedBy = "contents")
     @JsonBackReference
     private Set<WeeklyReport> weeklyReports;
+
+    @ManyToMany(mappedBy = "contents")
+    @JsonBackReference
+    private Set<Question> questions;
 }

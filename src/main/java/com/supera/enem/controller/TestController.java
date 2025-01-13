@@ -16,6 +16,11 @@ public class TestController {
     @Autowired
     private TestService testService;
 
+    @GetMapping
+    public TestResponseDTO generateTest() {
+        return testService.generateTest();
+    }
+
     @GetMapping("/completed")
     public List<TestResponseDTO> getCompletedTests() {
         return testService.getCompletedTests();
