@@ -16,7 +16,8 @@ public class TestController {
     @Autowired
     private TestService testService;
 
-    @GetMapping
+
+    @PostMapping("/generate")
     public TestResponseDTO generateTest() {
         return testService.generateTest();
     }
