@@ -141,12 +141,14 @@
 			<version>${kotlin.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+		<!-- O spring-boot-starter-test já inclui o JUnit 5. -->
+		<!--
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.mockito</groupId>
