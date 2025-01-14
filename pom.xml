@@ -206,6 +206,10 @@
                     <url>jdbc:postgresql://localhost:5432/enem</url>
                     <user>NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA</user>
                     <password>3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM</password>
+					<schemas>
+						<schema>public</schema>
+					</schemas>
+					<cleanDisabled>false</cleanDisabled>
                 </configuration>
             </plugin>
 
