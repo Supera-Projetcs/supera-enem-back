@@ -22,5 +22,5 @@ public class Answer {
 
     @ManyToOne
     @JoinColumn(name = "test_id")
-    private Test test;
+    private TestEntity testEntity;
 }

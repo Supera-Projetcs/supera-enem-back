@@ -1,7 +1,5 @@
 package com.supera.enem;
 
-import com.supera.enem.controller.DTOS.AddressDTO;
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
 import com.supera.enem.domain.Address;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.enums.Weekday;
