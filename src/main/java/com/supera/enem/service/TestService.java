@@ -24,7 +24,8 @@ import java.util.stream.Collectors;
 public class TestService {
     @Autowired
     private TestRepository testRepository;
-    private final TestMapper testMapper = TestMapper.INSTANCE;
+    @Autowired
+    private TestMapper testMapper;
     @Autowired
     private StudentRepository studentRepository;
     @Autowired

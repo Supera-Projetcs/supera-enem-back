@@ -133,20 +133,24 @@ public class TestServiceTest {
     void shouldGetTestByIdWhenExists() {
 
         Long testId = 1L;
-        TestEntity test = new TestEntity();
 
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId(testId);
 
-        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(testEntity));
         TestResponseDTO testResponseMock = new TestResponseDTO();
         testResponseMock.setId(testId);
-        when(testMapper.toDTO(any(TestEntity.class))).thenReturn(testResponseMock);
 
+        when(testMapper.toDTO(testEntity)).thenReturn(testResponseMock);
 
         var testResponse = testService.getTestById(testId);
 
         assertNotNull(testResponse, "A resposta do teste não deve ser nula.");
-        assertEquals(testId, testResponse.getId(), "O ID do teste deve corresponder.");
+        assertEquals(testId, testResponse.getId(), "O ID do teste deve corresponder a um teste que exista.");
+
         verify(testRepository, times(1)).findById(testId);
+
+        verify(testMapper, times(1)).toDTO(testEntity);
     }
 
     @Test

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface TestRepository extends JpaRepository<TestEntity, Long> {
-    @Query("SELECT t FROM Test t WHERE t.date <= CURRENT_DATE")
+    @Query("SELECT t FROM TestEntity t WHERE t.date <= CURRENT_DATE")
     List<TestEntity> findCompletedTests();
 
     List<TestEntity> findByStudentAndDateBetween(Student student, java.sql.Date startDate, java.sql.Date endDate);
