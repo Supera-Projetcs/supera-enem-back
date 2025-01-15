@@ -4,13 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-public class Test {
+public class TestEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +35,7 @@ public class Test {
             joinColumns = @JoinColumn(name = "test_id"),
             inverseJoinColumns = @JoinColumn(name = "question_id")
     )
-    private List<Question> questions;
+    private List<Question> questions = new ArrayList<>();
 
     @PrePersist
     private void setDefaultDate() {

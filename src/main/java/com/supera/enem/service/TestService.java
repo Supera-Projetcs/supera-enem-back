@@ -39,9 +39,9 @@ public class TestService {
     }
 
     public TestResponseDTO getTestById(Long id) {
-        Test test = testRepository.findById(id)
+        TestEntity testEntity = testRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Test not found with id: " + id));
-        return testMapper.toDTO(test);
+        return testMapper.toDTO(testEntity);
     }
 
     public TestResponseDTO generateTest() {
@@ -68,18 +68,18 @@ public class TestService {
             throw new RuntimeException("No content found in the weekly report");
         }
 
-        Test test = new Test();
-        test.setStudent(student);
-        test.setType(TestType.WEEKLY);
+        TestEntity testEntity = new TestEntity();
+        testEntity.setStudent(student);
+        testEntity.setType(TestType.WEEKLY);
 
         for (Content content : contents) {
             List<Question> questions = questionRepository.findByContents(content);
             List<Question> randomQuestions = getRandomQuestions(questions, 10);
-            test.getQuestions().addAll(randomQuestions);
+            testEntity.getQuestions().addAll(randomQuestions);
         }
 
-        testRepository.save(test);
-        return testMapper.toDTO(test);
+        testRepository.save(testEntity);
+        return testMapper.toDTO(testEntity);
     }
 
     public WeeklyReport getLastWeeklyReportByStudent(Student student) {
@@ -104,12 +104,12 @@ public class TestService {
         LocalDate startOfWeek = now.with(java.time.DayOfWeek.MONDAY);
         LocalDate endOfWeek = now.with(java.time.DayOfWeek.SUNDAY);
 
-        List<Test> tests = testRepository.findByStudentAndDateBetween(
+        List<TestEntity> testEntities = testRepository.findByStudentAndDateBetween(
                 student,
                 java.sql.Date.valueOf(startOfWeek),
                 java.sql.Date.valueOf(endOfWeek)
         );
 
-        return !tests.isEmpty();
+        return !testEntities.isEmpty();
     }
 }

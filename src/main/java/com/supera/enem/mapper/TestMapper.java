@@ -1,13 +1,15 @@
 package com.supera.enem.mapper;
 
 import com.supera.enem.controller.DTOS.TestResponseDTO;
-import com.supera.enem.domain.Test;
+import com.supera.enem.domain.TestEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface TestMapper {
     TestMapper INSTANCE = Mappers.getMapper(TestMapper.class);
 
-    TestResponseDTO toDTO(Test test);
+    @Mapping(target = "type", source = "type")
+    TestResponseDTO toDTO(TestEntity testEntity);
 }
