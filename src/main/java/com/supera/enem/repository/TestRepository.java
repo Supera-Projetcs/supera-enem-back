@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+//updated repository
 @Repository
 public interface TestRepository extends JpaRepository<TestEntity, Long> {
     @Query("SELECT t FROM TestEntity t WHERE t.date <= CURRENT_DATE")
