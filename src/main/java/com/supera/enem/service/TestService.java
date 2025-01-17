@@ -3,11 +3,13 @@ package com.supera.enem.service;
 import com.supera.enem.controller.DTOS.TestResponseDTO;
 import com.supera.enem.domain.*;
 import com.supera.enem.domain.enums.TestType;
+import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.TestMapper;
 import com.supera.enem.repository.QuestionRepository;
 import com.supera.enem.repository.StudentRepository;
 import com.supera.enem.repository.TestRepository;
 import com.supera.enem.repository.WeeklyReportRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +17,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -39,12 +42,14 @@ public class TestService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public TestResponseDTO getTestById(Long id) {
         TestEntity testEntity = testRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Test not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Test not found with id: " + id));
         return testMapper.toDTO(testEntity);
     }
 
+    @Transactional
     public TestResponseDTO generateTest() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
@@ -57,7 +62,6 @@ public class TestService {
         if (hasTestInCurrentWeek(student)) {
             throw new RuntimeException("Test for the current week already exists.");
         }
-
 
         WeeklyReport lastWeeklyReport = getLastWeeklyReportByStudent(student);
         if (lastWeeklyReport == null) {
@@ -73,10 +77,16 @@ public class TestService {
         testEntity.setStudent(student);
         testEntity.setType(TestType.WEEKLY);
 
+        Set<Question> uniqueQuestions = new HashSet<>();
+
         for (Content content : contents) {
-            List<Question> questions = questionRepository.findByContents(content);
-            List<Question> randomQuestions = getRandomQuestions(questions, 10);
-            testEntity.getQuestions().addAll(randomQuestions);
+            List<Question> questions = questionRepository.findRandomQuestionsByContent(content.getId(), 10);
+
+            for (Question question : questions) {
+                if (uniqueQuestions.add(question)) {
+                    testEntity.getQuestions().add(question);
+                }
+            }
         }
 
         testRepository.save(testEntity);

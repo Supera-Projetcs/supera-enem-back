@@ -11,6 +11,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+//@Table(name = "test")
 public class TestEntity {
 
     @Id
@@ -29,7 +30,7 @@ public class TestEntity {
     @JoinColumn(name = "student_id")
     private Student student;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "test_questions",
             joinColumns = @JoinColumn(name = "test_id"),
