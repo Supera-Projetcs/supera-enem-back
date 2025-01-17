@@ -16,4 +16,5 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query(value = "SELECT * FROM question q JOIN question_contents qc ON q.id = qc.question_id WHERE qc.content_id = :contentId ORDER BY RANDOM() LIMIT :limit", nativeQuery = true)
     List<Question> findRandomQuestionsByContent(@Param("contentId") Long contentId, @Param("limit") int limit);
 
+    Question getQuestionById(Long id);
 }

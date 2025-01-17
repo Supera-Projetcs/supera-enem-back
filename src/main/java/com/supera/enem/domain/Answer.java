@@ -23,4 +23,5 @@ public class Answer {
     @ManyToOne
     @JoinColumn(name = "test_id")
     private TestEntity testEntity;
+
 }
