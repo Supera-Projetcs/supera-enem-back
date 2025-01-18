@@ -57,6 +57,13 @@ public class TestService {
         }
         Jwt jwt = (Jwt) authentication.getPrincipal();
         String keycloakId = jwt.getClaim("sub");
+
+        //validação para a ausencia do sub no jwt
+        if (keycloakId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+
         Student student = studentRepository.findByKeycloakId(keycloakId);
 
         if (hasTestInCurrentWeek(student)) {
@@ -98,7 +105,7 @@ public class TestService {
                 .orElseThrow(() -> new RuntimeException("Weekly report not found"));
     }
 
-    private List<Question> getRandomQuestions(List<Question> questions, int count) {
+    public List<Question> getRandomQuestions(List<Question> questions, int count) {
         if (questions.size() <= count) {
             return questions; // Return all questions if less than or equal to count
         }
@@ -110,7 +117,7 @@ public class TestService {
                 .toList();
     }
 
-    private boolean hasTestInCurrentWeek(Student student) {
+    public boolean hasTestInCurrentWeek(Student student) {
         LocalDate now = LocalDate.now();
         LocalDate startOfWeek = now.with(java.time.DayOfWeek.MONDAY);
         LocalDate endOfWeek = now.with(java.time.DayOfWeek.SUNDAY);

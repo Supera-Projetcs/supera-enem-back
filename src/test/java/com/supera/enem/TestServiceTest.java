@@ -177,4 +177,166 @@ public class TestServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
         assertEquals("Weekly report not found", exception.getMessage());
     }
+
+    @Test
+    void shouldGenerateTestWithMultipleContents() {
+        mockAuthentication();
+        Student student = mockStudent();
+
+        //múltiplos conteúdos relatório semanal
+        WeeklyReport weeklyReport = new WeeklyReport();
+        Content content1 = new Content();
+        content1.setId(1L);
+        Content content2 = new Content();
+        content2.setId(2L);
+        weeklyReport.setContents(new HashSet<>(Arrays.asList(content1, content2)));
+
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
+                .thenReturn(Optional.of(weeklyReport));
+
+        //perguntas
+        Question question1 = new Question();
+        question1.setText("Pergunta 1 do conteúdo 1");
+        when(questionRepository.findRandomQuestionsByContent(content1.getId(), 10))
+                .thenReturn(Collections.singletonList(question1));
+
+        Question question2 = new Question();
+        question2.setText("Pergunta 1 do conteúdo 2");
+        when(questionRepository.findRandomQuestionsByContent(content2.getId(), 10))
+                .thenReturn(Collections.singletonList(question2));
+
+        when(testMapper.toDTO(any(TestEntity.class))).thenReturn(new TestResponseDTO());
+        when(testRepository.save(any(TestEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var testResponse = testService.generateTest();
+
+        assertNotNull(testResponse);
+        verify(testRepository, times(1)).save(any(TestEntity.class));
+        verify(questionRepository, times(1)).findRandomQuestionsByContent(content1.getId(), 10);
+        verify(questionRepository, times(1)).findRandomQuestionsByContent(content2.getId(), 10);
+    }
+
+    @Test
+    void shouldNotIncludeDuplicateQuestions() {
+        mockAuthentication();
+        Student student = mockStudent();
+
+        WeeklyReport weeklyReport = new WeeklyReport();
+        Content content = new Content();
+        content.setId(1L);
+        weeklyReport.setContents(Set.of(content));
+
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
+                .thenReturn(Optional.of(weeklyReport));
+
+        //duas perguntas iguais
+        Question question1 = new Question();
+        question1.setId(1L);
+        question1.setText("Pergunta duplicada");
+        List<Question> questions = Arrays.asList(question1, question1);
+
+        when(questionRepository.findRandomQuestionsByContent(content.getId(), 10))
+                .thenReturn(questions);
+
+        when(testMapper.toDTO(any(TestEntity.class))).thenReturn(new TestResponseDTO());
+        when(testRepository.save(any(TestEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var testResponse = testService.generateTest();
+
+        assertNotNull(testResponse);
+        verify(testRepository, times(1)).save(any(TestEntity.class));
+        verify(questionRepository, times(1)).findRandomQuestionsByContent(content.getId(), 10);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWeeklyReportHasNoContents() {
+        mockAuthentication();
+        Student student = mockStudent();
+
+        WeeklyReport weeklyReport = new WeeklyReport();
+        weeklyReport.setContents(Collections.emptySet());
+
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
+                .thenReturn(Optional.of(weeklyReport));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("No content found in the weekly report", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSubClaimIsMissing() {
+        //claim "sub" ausente
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(jwt);
+        when(jwt.getClaim("sub")).thenReturn(null);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("User not authenticated", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnTrueWhenTestExistsInCurrentWeek() {
+        Student student = mockStudent();
+
+        List<TestEntity> tests = List.of(new TestEntity());
+        when(testRepository.findByStudentAndDateBetween(
+                eq(student),
+                any(),
+                any())
+        ).thenReturn(tests);
+
+        boolean result = testService.hasTestInCurrentWeek(student);
+
+        assertTrue(result, "true quando houver testes.");
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
+    }
+
+    @Test
+    void shouldReturnFalseWhenNoTestExistsInCurrentWeek() {
+        Student student = mockStudent();
+
+        when(testRepository.findByStudentAndDateBetween(
+                eq(student),
+                any(),
+                any())
+        ).thenReturn(Collections.emptyList());
+
+        boolean result = testService.hasTestInCurrentWeek(student);
+
+        assertFalse(result, "false quando não houver testes.");
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
+    }
+
+    @Test
+    void shouldReturnAllQuestionsWhenLessThanOrEqualToLimit() {
+        List<Question> questions = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            Question question = new Question();
+            question.setId((long) i);
+            questions.add(question);
+        }
+
+        List<Question> result = testService.getRandomQuestions(questions, 10);
+
+        assertEquals(5, result.size(), "todas as perguntas quando o número for menor ou igual ao limite.");
+    }
+
+    @Test
+    void shouldReturnLimitedQuestionsWhenMoreThanLimit() {
+        List<Question> questions = new ArrayList<>();
+        for (int i = 1; i <= 15; i++) {
+            Question question = new Question();
+            question.setId((long) i);
+            questions.add(question);
+        }
+
+        List<Question> result = testService.getRandomQuestions(questions, 10);
+
+        assertEquals(10, result.size(), "retornar o limite de perguntas quando houver mais disponíveis.");
+        assertTrue(new HashSet<>(result).size() == result.size(), "Todas as perguntas devem ser únicas.");
+    }
 }
+
+
+
