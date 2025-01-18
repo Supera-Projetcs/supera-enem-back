@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +17,11 @@ public interface QuestionMapper {
 
     QuestionMapper INSTANCE = Mappers.getMapper(QuestionMapper.class);
 
+    //lista vazia caso não existam imagens, ou sempre devemos ter imagens?
     default List<String> map(List<Image> images) {
+        if (images == null) {
+            return Collections.emptyList();
+        }
         return images.stream()
                 .map(Image::getPath)
                 .collect(Collectors.toList());
