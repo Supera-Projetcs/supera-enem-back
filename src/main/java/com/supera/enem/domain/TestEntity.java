@@ -4,12 +4,15 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
-public class Test {
+//@Table(name = "test")
+public class TestEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +29,17 @@ public class Test {
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "test_questions",
+            joinColumns = @JoinColumn(name = "test_id"),
+            inverseJoinColumns = @JoinColumn(name = "question_id")
+    )
+    private List<Question> questions = new ArrayList<>();
+
+    @PrePersist
+    private void setDefaultDate() {
+        this.date = new Date();
+    }
 }

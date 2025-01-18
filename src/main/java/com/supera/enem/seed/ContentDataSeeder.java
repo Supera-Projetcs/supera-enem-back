@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-@Component
+//@Component
 public class ContentDataSeeder implements CommandLineRunner {
     private final ContentRepository contentRepository;
     private final SubjectRepository subjectRepository;
