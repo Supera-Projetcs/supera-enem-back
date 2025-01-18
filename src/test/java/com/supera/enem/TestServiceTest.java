@@ -124,7 +124,7 @@ public class TestServiceTest {
         var completedTests = testService.getCompletedTests();
 
         assertNotNull(completedTests, "Os testes completos não devem ser nulos.");
-        assertEquals(1, completedTests.size(), "Deve haver um teste completo.");
+        assertEquals(1, completedTests.size(), "Deve ter um teste completo.");
         verify(testRepository, times(1)).findCompletedTests();
     }
 
