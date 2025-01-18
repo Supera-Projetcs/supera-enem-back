@@ -13,7 +13,7 @@ public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, Long
 
     List<WeeklyReport> findByStudent(Student student);
 
-    WeeklyReport findByIdAndStudent(Long id, Student student);
+    Optional<WeeklyReport> findByIdAndStudent(Long id, Student student);
 
     @Query("SELECT wr FROM WeeklyReport wr WHERE wr.student.id = :studentId ORDER BY wr.date DESC")
     Optional<WeeklyReport> findTopByStudentOrderByDateDesc(@Param("studentId") Long studentId);

@@ -1,6 +1,7 @@
 package com.supera.enem.controller;
 
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
+import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
 import com.supera.enem.repository.StudentRepository;
@@ -12,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -47,12 +45,23 @@ public class WeeklyReportController {
     }
 
     @GetMapping("/{id}")
-    public WeeklyReportDTO getWeeklyReportById(@PathVariable Long id, @AuthenticationPrincipal Student student) {
+    public WeeklyReportDTO getWeeklyReportById(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+        String keycloakId = jwt.getClaim("sub");
+        Student student = studentRepository.findByKeycloakId(keycloakId);
         WeeklyReport weeklyReport = weeklyReportService.getWeeklyReportById(id, student);
         if (weeklyReport == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Weekly report not found");
         }
         return convertToDTO(weeklyReport);
+    }
+
+    @PostMapping("update/{id}")
+    public WeeklyReportDTO updateWeeklyReport(@RequestBody WeeklyReportRequestDTO weeklyReportDTO, @PathVariable Long id) {
+        return weeklyReportService.updateWeeklyReport(weeklyReportDTO, id);
     }
 
     private WeeklyReportDTO convertToDTO(WeeklyReport weeklyReport) {
