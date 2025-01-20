@@ -2,6 +2,10 @@ package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
+import com.supera.enem.controller.DTOS.WeeklyReportResponseDTO;
+import com.supera.enem.domain.Content;
+import com.supera.enem.controller.DTOS.WeeklyReportDTO;
+import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 import com.supera.enem.domain.Performance;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.WeeklyReportMapper;
@@ -10,25 +14,34 @@ import com.supera.enem.repository.PerformanceRepository;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
 
+import com.supera.enem.exception.ResourceNotFoundException;
+import com.supera.enem.mapper.WeeklyReportMapper;
+import com.supera.enem.repository.ContentRepository;
 import com.supera.enem.repository.WeeklyReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Set;
 
 @Service
 public class WeeklyReportService {
 
     @Autowired
     private WeeklyReportRepository weeklyReportRepository;
-
+    @Autowired
+    private AuthenticatedService authenticatedService;
 
     private final WeeklyReportMapper weeklyReportMapper = WeeklyReportMapper.INSTANCE;
+    @Autowired
+    private ContentRepository contentRepository;
 
     @Autowired
     private PerformanceRepository performanceRepository;
@@ -81,6 +94,29 @@ public class WeeklyReportService {
         return null;
     }
 
+
+
+
+    public WeeklyReportDTO updateWeeklyReport(WeeklyReportRequestDTO weeklyReportRequestDTO, Long id) {
+
+        Student student = authenticatedService.getAuthenticatedStudent();
+
+        WeeklyReport existingReport = weeklyReportRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("WeeklyReport not found with ID: " + id));
+
+        existingReport.setDate(weeklyReportRequestDTO.getDate());
+
+        if (weeklyReportRequestDTO.getContentIds() != null && !weeklyReportRequestDTO.getContentIds().isEmpty()) {
+            Set<Content> updatedContents = new LinkedHashSet<>(contentRepository.findAllById(weeklyReportRequestDTO.getContentIds()));
+            existingReport.setContents(updatedContents);
+        } else {
+            existingReport.getContents().clear();
+        }
+
+        WeeklyReport updatedReport = weeklyReportRepository.save(existingReport);
+
+        return weeklyReportMapper.toDTO(updatedReport);
+    }
 
 
 }

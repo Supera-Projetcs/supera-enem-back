@@ -33,6 +33,5 @@ public class WeeklyReport {
     )
     @JsonManagedReference
     private Set<Content> contents;
-
-
+    
 }

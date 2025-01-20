@@ -39,6 +39,11 @@ public class PerformanceService {
     private StudentRepository studentRepository;
 
     public List<SubjectDifficultyDTO> getSubjectDifficulties(Long studentId) {
+
+        if (studentId == null) {
+            throw new IllegalArgumentException("Student ID must not be null");
+        }
+
         List<Object[]> results = performanceRepository.findAveragePerformanceBySubject(studentId);
 
         return results.stream().map(result -> {

@@ -1,6 +1,7 @@
 package com.supera.enem.controller;
 
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
+import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
 
@@ -12,11 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -48,6 +46,12 @@ public class WeeklyReportController {
         Student student = authenticationService.getAuthenticatedStudent();
         return ResponseEntity.ok(weeklyReportService.getWeeklyReport(student.getId()));
     }
+
+    @PostMapping("update/{id}")
+    public WeeklyReportDTO updateWeeklyReport(@RequestBody WeeklyReportRequestDTO weeklyReportDTO, @PathVariable Long id) {
+        return weeklyReportService.updateWeeklyReport(weeklyReportDTO, id);
+    }
+
 
 
 }

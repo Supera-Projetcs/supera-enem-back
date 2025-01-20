@@ -5,7 +5,6 @@ import com.supera.enem.domain.Student;
 import lombok.*;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -13,7 +12,12 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class WeeklyReportRequestDTO {
+public class WeeklyReportResponseDTO {
+    private Long id;
+
     private Date date;
-    private List<Long> contentIds;
+
+    private Student student;
+
+    private Set<Content> contents;
 }
