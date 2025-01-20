@@ -9,5 +9,5 @@ import org.mapstruct.factory.Mappers;
 public interface WeeklyReportMapper {
     WeeklyReportMapper INSTANCE = Mappers.getMapper(WeeklyReportMapper.class);
 
-    WeeklyReportDTO toDTO(WeeklyReport weeklyReport);
+    WeeklyReportDTO toDto(WeeklyReport weeklyReport);
 }

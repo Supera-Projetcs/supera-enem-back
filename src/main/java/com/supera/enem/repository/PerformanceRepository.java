@@ -5,6 +5,7 @@ import com.supera.enem.domain.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
 import com.supera.enem.domain.Performance;
 
@@ -22,5 +23,20 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
             "GROUP BY s.name")
     List<Object[]> findAveragePerformanceBySubject(Long studentId);
 
+
+    @Query("""
+        SELECT p
+        FROM Performance p
+        WHERE p.student.id = :studentId
+          AND p.createdAt = (
+              SELECT MAX(p2.createdAt)
+              FROM Performance p2
+              WHERE p2.student.id = :studentId
+                AND p2.content.id = p.content.id
+          )
+    """)
+    List<Performance> findLatestPerformancesByStudent(@Param("studentId") Long studentId);
+
+    List<Performance> findAllByStudent_Id(Long studentId);
     Optional<Performance> findByStudentAndContent(Student student, Content content);
 }

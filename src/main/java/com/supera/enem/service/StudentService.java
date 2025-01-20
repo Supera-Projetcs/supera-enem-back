@@ -4,10 +4,12 @@ import com.supera.enem.controller.DTOS.Student.*;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
 import com.supera.enem.domain.Student;
+import com.supera.enem.exception.ResourceAlreadyExists;
 import com.supera.enem.mapper.StudentMapper;
 
 import com.supera.enem.mapper.UserKeycloakMapper;
 import com.supera.enem.repository.StudentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,17 +19,22 @@ import java.util.List;
 @Service
 public class StudentService {
 
-    private final StudentRepository studentRepository;
-    private final KeycloackUserService keycloakService;
-    private final StudentMapper studentMapper;
-    private final UserKeycloakMapper userKeycloakMapper;
+    @Autowired
+    private StudentRepository studentRepository;
 
-    public StudentService(StudentRepository studentRepository, KeycloackUserService keycloakImplemantation) {
-        this.studentRepository = studentRepository;
-        this.keycloakService = keycloakImplemantation;
-        this.studentMapper = StudentMapper.INSTANCE;
-        this.userKeycloakMapper = UserKeycloakMapper.INSTANCE;
-    }
+    @Autowired
+    private KeycloackUserService keycloakService;
+
+    @Autowired
+    private StudentMapper studentMapper;
+
+    @Autowired
+    private UserKeycloakMapper userKeycloakMapper;
+
+
+    @Autowired
+    private PerformanceService performanceService;
+
 
     public Student getStudentById(Long id) {
         return studentRepository.findById(id)
@@ -105,22 +112,25 @@ public class StudentService {
     }
 
     public Student createStudent(StudentDTO studentRecord) {
-        if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new IllegalArgumentException("Estudante com este e-mail já existe.");
+        if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new ResourceAlreadyExists("Estudante com este e-mail já existe.");
 
-        if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) throw new IllegalArgumentException("Estudante com este username já existe.");
+        if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) throw new ResourceAlreadyExists("Estudante com este username já existe.");
 
-        if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new IllegalArgumentException("E-mail inválido.");
+        if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new ResourceAlreadyExists("E-mail inválido.");
 
         validatePassword(studentRecord.getPassword());
 
         UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
         String keycloakUserId = keycloakService.createUser(userKeycloakRecord);
 
-        if (keycloakUserId == null) throw new IllegalStateException("Erro ao criar usuário no Keycloak.");
+        if (keycloakUserId == null) throw new ResourceAlreadyExists("Erro ao criar usuário no Keycloak.");
 
         Student student = studentMapper.toStudent(studentRecord);
         student.setKeycloakId(keycloakUserId);
-        return studentRepository.save(student);
+        Student savedStudent = studentRepository.save(student);
+        performanceService.createInitialPerformance(savedStudent.getId(),studentRecord.getInitialPerformaceList());
+
+        return savedStudent;
     }
 
 }
