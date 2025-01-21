@@ -54,6 +54,13 @@ public class TestService {
             throw new RuntimeException("User not authenticated");
         }
 
+        if (id == null) {
+            throw new IllegalArgumentException("ID must not be null");
+        }
+        if (id < 0) {
+            throw new IllegalArgumentException("Invalid ID: " + id);
+        }
+
         TestEntity testEntity = testRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Test not found with id: " + id));
         return testMapper.toDTO(testEntity);
