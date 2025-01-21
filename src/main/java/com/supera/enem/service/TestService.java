@@ -37,6 +37,11 @@ public class TestService {
     private QuestionRepository questionRepository;
 
     public List<TestResponseDTO> getCompletedTests() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
         return testRepository.findCompletedTests().stream()
                 .map(testMapper::toDTO)
                 .collect(Collectors.toList());
@@ -44,6 +49,11 @@ public class TestService {
 
     @Transactional
     public TestResponseDTO getTestById(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
         TestEntity testEntity = testRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Test not found with id: " + id));
         return testMapper.toDTO(testEntity);
