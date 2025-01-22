@@ -21,6 +21,9 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 class TestServiceTest extends BaseTest {
 
     @InjectMocks
@@ -284,5 +287,41 @@ class TestServiceTest extends BaseTest {
         verify(testRepository, times(1)).save(any(TestEntity.class));
         verify(testMapper, times(1)).toDTO(any(TestEntity.class));
     }
+
+    @Test
+    @DisplayName("Deve lançar uma exceção quando o keycloakId estiver ausente no JWT.")
+    void shouldThrowException_WhenKeycloakIdIsAbsentInJwt() {
+
+        mockAuthenticatedUserWithoutKeycloakId();
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("User not authenticated", exception.getMessage());
+    }
+
+    //simular autenticação sem keycloakId
+    private void mockAuthenticatedUserWithoutKeycloakId() {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        Jwt jwtMock = mock(Jwt.class);
+        when(jwtMock.getClaim("sub")).thenReturn(null);
+        when(authentication.getPrincipal()).thenReturn(jwtMock);
+    }
+
+    @Test
+    @DisplayName("Deve lançar uma exceção quando o estudante não for encontrado no repositório.")
+    void shouldThrowException_WhenStudentNotFound() {
+
+        mockAuthenticatedUser();
+
+        when(studentRepository.findByKeycloakId(anyString())).thenReturn(null);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("Student not found", exception.getMessage());
+
+        verify(studentRepository, times(1)).findByKeycloakId(anyString());
+        verifyNoInteractions(testRepository, testMapper, weeklyReportRepository, questionRepository);
+    }
+
 
 }

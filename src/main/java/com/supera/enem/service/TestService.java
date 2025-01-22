@@ -83,6 +83,10 @@ public class TestService {
 
         Student student = studentRepository.findByKeycloakId(keycloakId);
 
+        if (student == null) {
+            throw new RuntimeException("Student not found");
+        }
+
         if (hasTestInCurrentWeek(student)) {
             throw new RuntimeException("Test for the current week already exists.");
         }
