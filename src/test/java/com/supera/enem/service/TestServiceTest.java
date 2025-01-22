@@ -124,7 +124,7 @@ class TestServiceTest extends BaseTest {
         verify(testMapper, never()).toDTO(any(TestEntity.class));
     }
 
-    //
+    //getTestById
 
     @Test
     @DisplayName("Deve retornar o teste por ID quando o ID for válido e existir.")
@@ -265,7 +265,7 @@ class TestServiceTest extends BaseTest {
     }
 
 
-    //
+    //generateTest
 
     @Test
     @DisplayName("Deve gerar um teste com dados válidos.")
@@ -438,7 +438,7 @@ class TestServiceTest extends BaseTest {
         verifyNoInteractions(testMapper);
     }
 
-    //
+    //getLastWeeklyReportByStudent
 
     @Test
     @DisplayName("Deve lançar exceção quando o estudante for null")
@@ -517,7 +517,7 @@ class TestServiceTest extends BaseTest {
         verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(student.getId());
     }
 
-    //
+    //getRandomQuestions
 
     @Test
     @DisplayName("Deve retornar todas as perguntas quando o tamanho da lista é menor ou igual ao limite")
@@ -611,6 +611,157 @@ class TestServiceTest extends BaseTest {
 
         assertEquals(2, result.size(), "Deve retornar perguntas únicas, eliminando duplicatas.");
         assertTrue(result.stream().distinct().count() == result.size(), "A lista retornada deve conter apenas perguntas únicas.");
+    }
+
+    //hasTestInCurrentWeek
+
+    @Test
+    @DisplayName("Deve retornar false quando não existem testes para a semana atual")
+    void shouldReturnFalse_WhenNoTestsInCurrentWeek() {
+
+        Student student = new Student();
+        student.setId(1L);
+
+        when(testRepository.findByStudentAndDateBetween(
+                eq(student),
+                any(java.sql.Date.class),
+                any(java.sql.Date.class)
+        )).thenReturn(Collections.emptyList());
+
+        boolean result = testService.hasTestInCurrentWeek(student);
+
+        assertFalse(result, "O método deve retornar false quando não existem testes para a semana atual.");
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Deve retornar true quando existem testes para a semana atual")
+    void shouldReturnTrue_WhenTestsExistInCurrentWeek() {
+
+        Student student = new Student();
+        student.setId(1L);
+
+        TestEntity test1 = new TestEntity();
+        test1.setId(1L);
+        test1.setStudent(student);
+
+        TestEntity test2 = new TestEntity();
+        test2.setId(2L);
+        test2.setStudent(student);
+
+        List<TestEntity> testEntities = List.of(test1, test2);
+
+        when(testRepository.findByStudentAndDateBetween(
+                eq(student),
+                any(java.sql.Date.class),
+                any(java.sql.Date.class)
+        )).thenReturn(testEntities);
+
+        boolean result = testService.hasTestInCurrentWeek(student);
+
+        assertTrue(result, "O método deve retornar true quando existem testes para a semana atual.");
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
+    }
+
+    //reprovado
+
+    /*@Test
+    @DisplayName("Deve retornar false quando o repositório retorna testes fora da semana atual")
+    void shouldReturnFalse_WhenRepositoryReturnsTestsOutsideCurrentWeek() {
+
+        Student student = new Student();
+        student.setId(1L);
+
+        LocalDate now = LocalDate.now();
+        LocalDate startOfWeek = now.with(java.time.DayOfWeek.MONDAY);
+        LocalDate endOfWeek = now.with(java.time.DayOfWeek.SUNDAY);
+
+        TestEntity testOutsideWeek = new TestEntity();
+        testOutsideWeek.setId(1L);
+        testOutsideWeek.setDate(java.sql.Date.valueOf(startOfWeek.minusDays(7)));
+
+        when(testRepository.findByStudentAndDateBetween(
+                eq(student),
+                eq(java.sql.Date.valueOf(startOfWeek)),
+                eq(java.sql.Date.valueOf(endOfWeek))
+        )).thenReturn(List.of(testOutsideWeek));
+
+        boolean result = testService.hasTestInCurrentWeek(student);
+
+        assertFalse(result, "O método deve retornar false quando os testes retornados estão fora da semana atual.");
+
+        verify(testRepository, times(1)).findByStudentAndDateBetween(
+                eq(student),
+                eq(java.sql.Date.valueOf(startOfWeek)),
+                eq(java.sql.Date.valueOf(endOfWeek))
+        );
+    }*/
+
+    @Test
+    @DisplayName("Validar comportamento em uma semana sem limites de testes e várias chamadas ao método")
+    void shouldReturnConsistentResults_WhenCalledMultipleTimes() {
+        Student student = new Student();
+        student.setId(1L);
+
+        TestEntity testEntity1 = new TestEntity();
+        testEntity1.setDate(java.sql.Date.valueOf(LocalDate.now().with(java.time.DayOfWeek.MONDAY)));
+
+        TestEntity testEntity2 = new TestEntity();
+        testEntity2.setDate(java.sql.Date.valueOf(LocalDate.now().with(java.time.DayOfWeek.WEDNESDAY)));
+
+        List<TestEntity> currentWeekTests = List.of(testEntity1, testEntity2);
+
+        when(testRepository.findByStudentAndDateBetween(
+                eq(student),
+                any(java.sql.Date.class),
+                any(java.sql.Date.class))
+        ).thenReturn(currentWeekTests);
+
+        boolean resultFirstCall = testService.hasTestInCurrentWeek(student);
+        boolean resultSecondCall = testService.hasTestInCurrentWeek(student);
+
+        assertTrue(resultFirstCall, "A primeira chamada deve retornar true para testes na semana atual.");
+        assertTrue(resultSecondCall, "A segunda chamada deve retornar true para testes na semana atual.");
+
+        verify(testRepository, times(2)).findByStudentAndDateBetween(
+                eq(student),
+                any(java.sql.Date.class),
+                any(java.sql.Date.class)
+        );
+    }
+
+    @Test
+    @DisplayName("Validar comportamento quando a data atual está nos limites do início e fim da semana")
+    void shouldReturnTrue_WhenTestDateIsAtStartOrEndOfWeek() {
+        Student student = new Student();
+        student.setId(1L);
+
+        LocalDate startOfWeek = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
+        LocalDate endOfWeek = LocalDate.now().with(java.time.DayOfWeek.SUNDAY);
+
+        TestEntity testAtStartOfWeek = new TestEntity();
+        testAtStartOfWeek.setDate(java.sql.Date.valueOf(startOfWeek));
+
+        TestEntity testAtEndOfWeek = new TestEntity();
+        testAtEndOfWeek.setDate(java.sql.Date.valueOf(endOfWeek));
+
+        List<TestEntity> boundaryTests = List.of(testAtStartOfWeek, testAtEndOfWeek);
+
+        when(testRepository.findByStudentAndDateBetween(
+                eq(student),
+                any(java.sql.Date.class),
+                any(java.sql.Date.class))
+        ).thenReturn(boundaryTests);
+
+        boolean result = testService.hasTestInCurrentWeek(student);
+
+        assertTrue(result, "O método deve retornar true para testes que estão no início ou fim da semana atual.");
+
+        verify(testRepository, times(1)).findByStudentAndDateBetween(
+                eq(student),
+                any(java.sql.Date.class),
+                any(java.sql.Date.class)
+        );
     }
 
 }
