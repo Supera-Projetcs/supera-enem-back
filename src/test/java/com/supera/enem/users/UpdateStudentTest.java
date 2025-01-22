@@ -1,4 +1,4 @@
-package com.supera.enem;
+package com.supera.enem.users;
 
 import com.supera.enem.domain.Address;
 import com.supera.enem.domain.Student;
@@ -63,7 +63,7 @@ public class UpdateStudentTest {
         when(studentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
 
-       Student updatedStudent =  studentService.updateEmailStudent(validStudent.getId(),newEmail);
+        Student updatedStudent =  studentService.updateEmailStudent(validStudent.getId(),newEmail);
 
 
         assertNotNull(updatedStudent);

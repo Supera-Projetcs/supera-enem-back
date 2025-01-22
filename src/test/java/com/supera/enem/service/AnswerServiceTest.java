@@ -1,4 +1,4 @@
-package com.supera.enem;
+package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.AnswerRequestDTO;
 import com.supera.enem.controller.DTOS.AnswerResponseDTO;

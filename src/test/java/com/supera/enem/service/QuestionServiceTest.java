@@ -1,4 +1,4 @@
-package com.supera.enem;
+package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.QuestionResponseDTO;
 import com.supera.enem.domain.Question;
@@ -146,5 +146,4 @@ public class QuestionServiceTest {
         assertTrue(result.isEmpty(), "Optional should be empty when question is not found.");
         verify(questionRepository, times(1)).findById(999L);
     }
-
 }
