@@ -110,6 +110,10 @@ public class TestService {
         for (Content content : contents) {
             List<Question> questions = questionRepository.findRandomQuestionsByContent(content.getId(), 10);
 
+            if (questions.isEmpty()) {
+                throw new RuntimeException("No questions found for content with id: " + content.getId());
+            }
+
             for (Question question : questions) {
                 if (uniqueQuestions.add(question)) {
                     testEntity.getQuestions().add(question);

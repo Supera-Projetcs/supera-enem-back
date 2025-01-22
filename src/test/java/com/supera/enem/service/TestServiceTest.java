@@ -323,5 +323,112 @@ class TestServiceTest extends BaseTest {
         verifyNoInteractions(testRepository, testMapper, weeklyReportRepository, questionRepository);
     }
 
+    @Test
+    @DisplayName("Deve lançar uma exceção quando já existir um teste para a semana atual.")
+    void shouldThrowException_WhenTestAlreadyExistsInCurrentWeek() {
+
+        mockAuthenticatedUser();
+
+        Student student = new Student();
+        student.setId(1L);
+        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+
+        when(testRepository.findByStudentAndDateBetween(any(Student.class), any(), any()))
+                .thenReturn(List.of(new TestEntity()));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("Test for the current week already exists.", exception.getMessage());
+
+        verify(studentRepository, times(1)).findByKeycloakId(anyString());
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(Student.class), any(), any());
+        verifyNoInteractions(weeklyReportRepository, questionRepository, testMapper);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando o relatório semanal não for encontrado no repositório.")
+    void shouldThrowException_WhenWeeklyReportNotFound() {
+
+        mockAuthenticatedUser();
+
+        Student student = new Student();
+        student.setId(1L);
+        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(anyLong()))
+                .thenReturn(Optional.empty());
+
+        when(testRepository.findByStudentAndDateBetween(any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("Weekly report not found", exception.getMessage());
+
+        verify(studentRepository, times(1)).findByKeycloakId(anyString());
+        verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(anyLong());
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
+        verifyNoMoreInteractions(questionRepository, testMapper, testRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando o relatório semanal não possuir conteúdos.")
+    void shouldThrowException_WhenWeeklyReportIsEmpty() {
+
+        mockAuthenticatedUser();
+
+        Student student = new Student();
+        student.setId(1L);
+        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+
+        WeeklyReport weeklyReport = new WeeklyReport();
+        weeklyReport.setContents(Collections.emptySet());
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(anyLong()))
+                .thenReturn(Optional.of(weeklyReport));
+
+        when(testRepository.findByStudentAndDateBetween(any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("No content found in the weekly report", exception.getMessage());
+
+        verify(studentRepository, times(1)).findByKeycloakId(anyString());
+        verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(anyLong());
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
+        verifyNoMoreInteractions(questionRepository, testMapper, testRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando um conteúdo não tem perguntas.")
+    void shouldThrowException_WhenContentHasNoQuestions() {
+
+        mockAuthenticatedUser();
+
+        Student student = new Student();
+        student.setId(1L);
+        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+
+        WeeklyReport weeklyReport = new WeeklyReport();
+        Content content = new Content();
+        content.setId(1L);
+        weeklyReport.setContents(Set.of(content));
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(anyLong()))
+                .thenReturn(Optional.of(weeklyReport));
+
+        when(testRepository.findByStudentAndDateBetween(any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        when(questionRepository.findRandomQuestionsByContent(eq(content.getId()), eq(10)))
+                .thenReturn(Collections.emptyList());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
+        assertEquals("No questions found for content with id: 1", exception.getMessage());
+
+        verify(studentRepository, times(1)).findByKeycloakId(anyString());
+        verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(anyLong());
+        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
+        verify(questionRepository, times(1)).findRandomQuestionsByContent(eq(content.getId()), eq(10));
+        verifyNoInteractions(testMapper);
+    }
+
+
 
 }
