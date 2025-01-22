@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
@@ -129,6 +130,8 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve retornar o teste por ID quando o ID for válido e existir.")
     void shouldReturnTestById_WhenIdIsValidAndExists() {
 
+        mockAuthenticatedUser();
+
         Long validId = 1L;
 
         TestEntity testEntity = new TestEntity();
@@ -152,6 +155,8 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve lançar ResourceNotFoundException quando o ID não existir.")
     void shouldThrowException_WhenIdDoesNotExist() {
 
+        mockAuthenticatedUser();
+
         Long invalidId = 99L;
 
         when(testRepository.findById(invalidId)).thenReturn(Optional.empty());
@@ -169,6 +174,8 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve lançar 'IllegalArgumentException' quando o ID for negativo.")
     void shouldThrowException_WhenIdIsNegative() {
 
+        mockAuthenticatedUser();
+
         Long negativeId = -1L;
 
         IllegalArgumentException exception = assertThrows(
@@ -183,7 +190,7 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve lançar 'IllegalArgumentException' quando o ID for nulo.")
     void shouldThrowException_WhenIdIsNull() {
-
+        mockAuthenticatedUser();
         Long nullId = null;
 
         IllegalArgumentException exception = assertThrows(
@@ -198,6 +205,7 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve retornar o teste por ID quando o ID for o menor ID válido.")
     void shouldReturnTestById_WhenIdIsSmallestValid() {
+        mockAuthenticatedUser();
         Long smallestValidId = 1L;
 
         TestEntity testEntity = new TestEntity();
@@ -220,6 +228,7 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve retornar o teste por ID quando o ID for um número muito grande.")
     void shouldReturnTestById_WhenIdIsVeryLarge() {
+        mockAuthenticatedUser();
         Long veryLargeId = Long.MAX_VALUE;
 
         TestEntity testEntity = new TestEntity();
@@ -434,13 +443,174 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve lançar exceção quando o estudante for null")
     void shouldThrowException_WhenStudentIsNull() {
-
+        mockAuthenticatedUser();
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> testService.getLastWeeklyReportByStudent(null)
         );
 
         assertEquals("Student must not be null", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando o relatório semanal não for encontrado no repositório")
+    void shouldThrowException_WhenWeeklyReportNotFoundInRepository() {
+        mockAuthenticatedUser();
+        Student student = new Student();
+        student.setId(1L);
+
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
+                .thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> testService.getLastWeeklyReportByStudent(student)
+        );
+
+        assertEquals("Weekly report not found", exception.getMessage());
+        verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(student.getId());
+    }
+
+    @Test
+    @DisplayName("Deve retornar o último relatório semanal para o estudante fornecido quando existente.")
+    void shouldReturnLastWeeklyReport_WhenStudentHasValidWeeklyReport() {
+        mockAuthenticatedUser();
+        Student student = new Student();
+        student.setId(1L);
+
+        WeeklyReport weeklyReport = new WeeklyReport();
+        weeklyReport.setId(1L);
+
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
+                .thenReturn(Optional.of(weeklyReport));
+
+        WeeklyReport result = testService.getLastWeeklyReportByStudent(student);
+
+        assertNotNull(result, "O resultado não deve ser nulo.");
+        assertEquals(weeklyReport.getId(), result.getId(), "O ID do relatório deve ser o mesmo retornado pelo repositório.");
+        verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(student.getId());
+    }
+
+    @Test
+    @DisplayName("Deve buscar o relatório mais recente quando múltiplos relatórios estão disponíveis")
+    void shouldReturnMostRecentWeeklyReport_WhenMultipleReportsExist() {
+        mockAuthenticatedUser();
+        Student student = new Student();
+        student.setId(1L);
+
+        WeeklyReport olderReport = new WeeklyReport();
+        olderReport.setId(1L);
+        olderReport.setDate(java.sql.Date.valueOf(LocalDate.of(2025, 1, 1)));
+
+        WeeklyReport recentReport = new WeeklyReport();
+        recentReport.setId(2L);
+        recentReport.setDate(java.sql.Date.valueOf(LocalDate.of(2025, 1, 15)));
+
+        when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
+                .thenReturn(Optional.of(recentReport));
+
+        WeeklyReport result = testService.getLastWeeklyReportByStudent(student);
+
+        assertNotNull(result, "O resultado não deve ser nulo.");
+        assertEquals(recentReport.getId(), result.getId(), "O relatório mais recente deve ser retornado.");
+        assertEquals(recentReport.getDate(), result.getDate(), "A data do relatório mais recente deve ser correta.");
+        verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(student.getId());
+    }
+
+    //
+
+    @Test
+    @DisplayName("Deve retornar todas as perguntas quando o tamanho da lista é menor ou igual ao limite")
+    void shouldReturnAllQuestions_WhenListSizeIsLessThanOrEqualToLimit() {
+        Question question1 = new Question();
+        question1.setId(1L);
+        Question question2 = new Question();
+        question2.setId(2L);
+
+        List<Question> questions = List.of(question1, question2);
+
+        List<Question> result = testService.getRandomQuestions(questions, 3);
+
+        assertEquals(2, result.size(), "Deve retornar todas as perguntas quando o tamanho da lista é menor ou igual ao limite.");
+        assertTrue(result.containsAll(questions), "A lista retornada deve conter todas as perguntas originais.");
+    }
+
+    @Test
+    @DisplayName("Deve retornar o número especificado de perguntas aleatórias")
+    void shouldReturnSpecifiedNumberOfRandomQuestions() {
+        Question question1 = new Question();
+        question1.setId(1L);
+        Question question2 = new Question();
+        question2.setId(2L);
+        Question question3 = new Question();
+        question3.setId(3L);
+        Question question4 = new Question();
+        question4.setId(4L);
+
+        List<Question> questions = List.of(question1, question2, question3, question4);
+
+        List<Question> result = testService.getRandomQuestions(questions, 2);
+
+        assertEquals(2, result.size(), "Deve retornar o número especificado de perguntas.");
+        assertTrue(questions.containsAll(result), "As perguntas retornadas devem ser parte da lista original.");
+    }
+
+    @Test
+    @DisplayName("Deve retornar uma lista vazia quando a lista original for vazia")
+    void shouldReturnEmptyList_WhenOriginalListIsEmpty() {
+        List<Question> questions = List.of();
+
+        List<Question> result = testService.getRandomQuestions(questions, 3);
+
+        assertTrue(result.isEmpty(), "Deve retornar uma lista vazia quando a lista original estiver vazia.");
+    }
+
+    @Test
+    @DisplayName("Deve retornar uma lista vazia quando o limite for zero")
+    void shouldReturnEmptyList_WhenLimitIsZero() {
+        Question question1 = new Question();
+        question1.setId(1L);
+        Question question2 = new Question();
+        question2.setId(2L);
+
+        List<Question> questions = List.of(question1, question2);
+
+        List<Question> result = testService.getRandomQuestions(questions, 0);
+
+        assertTrue(result.isEmpty(), "Deve retornar uma lista vazia quando o limite for zero.");
+    }
+
+    @Test
+    @DisplayName("Deve retornar uma lista vazia quando o limite for negativo")
+    void shouldReturnEmptyList_WhenLimitIsNegative() {
+        Question question1 = new Question();
+        question1.setId(1L);
+        Question question2 = new Question();
+        question2.setId(2L);
+
+        List<Question> questions = List.of(question1, question2);
+
+        List<Question> result = testService.getRandomQuestions(questions, -1);
+
+        assertTrue(result.isEmpty(), "Deve retornar uma lista vazia quando o limite for negativo.");
+    }
+
+    @Test
+    @DisplayName("Deve retornar perguntas únicas, eliminando duplicatas")
+    void shouldReturnUniqueQuestions_WhenOriginalListHasDuplicates() {
+        Question question1 = new Question();
+        question1.setId(1L);
+        Question question2 = new Question();
+        question2.setId(2L);
+        Question question3 = new Question();
+        question3.setId(1L);
+
+        List<Question> questions = List.of(question1, question2, question3);
+
+        List<Question> result = testService.getRandomQuestions(questions, 3);
+
+        assertEquals(2, result.size(), "Deve retornar perguntas únicas, eliminando duplicatas.");
+        assertTrue(result.stream().distinct().count() == result.size(), "A lista retornada deve conter apenas perguntas únicas.");
     }
 
 }

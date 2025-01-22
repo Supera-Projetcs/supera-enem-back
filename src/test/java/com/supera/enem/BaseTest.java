@@ -23,6 +23,11 @@ public class BaseTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    @BeforeEach
+    public void resetSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     protected void mockAuthenticatedUser() {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
