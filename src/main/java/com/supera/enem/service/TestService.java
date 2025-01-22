@@ -126,6 +126,10 @@ public class TestService {
     }
 
     public WeeklyReport getLastWeeklyReportByStudent(Student student) {
+        if (student == null) {
+            throw new IllegalArgumentException("Student must not be null");
+        }
+
         return weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId())
                 .orElseThrow(() -> new RuntimeException("Weekly report not found"));
     }

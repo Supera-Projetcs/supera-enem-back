@@ -429,6 +429,18 @@ class TestServiceTest extends BaseTest {
         verifyNoInteractions(testMapper);
     }
 
+    //
 
+    @Test
+    @DisplayName("Deve lançar exceção quando o estudante for null")
+    void shouldThrowException_WhenStudentIsNull() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> testService.getLastWeeklyReportByStudent(null)
+        );
+
+        assertEquals("Student must not be null", exception.getMessage());
+    }
 
 }
