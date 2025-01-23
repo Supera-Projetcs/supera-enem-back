@@ -17,10 +17,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +34,11 @@ public class TestService {
     private QuestionRepository questionRepository;
 
     public List<TestResponseDTO> getCompletedTests() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
         return testRepository.findCompletedTests().stream()
                 .map(testMapper::toDTO)
                 .collect(Collectors.toList());
@@ -44,7 +46,20 @@ public class TestService {
 
     @Transactional
     public TestResponseDTO getTestById(Long id) {
-        TestEntity testEntity = testRepository.findById(id).orElseThrow( () -> new ResourceNotFoundException("Não encontrado"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        if (id == null) {
+            throw new IllegalArgumentException("ID must not be null");
+        }
+        if (id < 0) {
+            throw new IllegalArgumentException("Invalid ID: " + id);
+        }
+
+        TestEntity testEntity = testRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Test not found with id: " + id));
         return testMapper.toDTO(testEntity);
     }
 
@@ -64,6 +79,10 @@ public class TestService {
 
 
         Student student = studentRepository.findByKeycloakId(keycloakId);
+
+        if (student == null) {
+            throw new RuntimeException("Student not found");
+        }
 
         if (hasTestInCurrentWeek(student)) {
             throw new RuntimeException("Test for the current week already exists.");
@@ -88,6 +107,10 @@ public class TestService {
         for (Content content : contents) {
             List<Question> questions = questionRepository.findRandomQuestionsByContent(content.getId(), 10);
 
+            if (questions.isEmpty()) {
+                throw new RuntimeException("No questions found for content with id: " + content.getId());
+            }
+
             for (Question question : questions) {
                 if (uniqueQuestions.add(question)) {
                     testEntity.getQuestions().add(question);
@@ -100,14 +123,37 @@ public class TestService {
     }
 
     public WeeklyReport getLastWeeklyReportByStudent(Student student) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String keycloakId = jwt.getClaim("sub");
+
+        //validação para a ausencia do sub no jwt
+        if (keycloakId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        if (student == null) {
+            throw new IllegalArgumentException("Student must not be null");
+        }
+
         return weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId())
                 .orElseThrow(() -> new RuntimeException("Weekly report not found"));
     }
 
     public List<Question> getRandomQuestions(List<Question> questions, int count) {
-        if (questions.size() <= count) {
-            return questions; // Return all questions if less than or equal to count
+        if (count <= 0) {
+            return Collections.emptyList();
         }
+
+        List<Question> uniqueQuestions = new ArrayList<>(new HashSet<>(questions));
+
+        if (uniqueQuestions.size() <= count) {
+            return uniqueQuestions;
+        }
+
         Random random = new Random();
         return random.ints(0, questions.size())
                 .distinct()
@@ -129,4 +175,5 @@ public class TestService {
 
         return !testEntities.isEmpty();
     }
+
 }

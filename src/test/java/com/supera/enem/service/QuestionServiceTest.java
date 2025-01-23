@@ -1,11 +1,11 @@
-package com.supera.enem;
+package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.QuestionResponseDTO;
 import com.supera.enem.domain.Question;
 import com.supera.enem.mapper.QuestionMapper;
 import com.supera.enem.repository.QuestionRepository;
-import com.supera.enem.service.QuestionService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,6 +35,7 @@ public class QuestionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar todas as questões com sucesso.")
     void shouldReturnAllQuestionsSuccessfully() {
         Question question = new Question();
         question.setId(1L);
@@ -57,8 +58,8 @@ public class QuestionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar lista vazia quando não houver questões disponíveis.")
     void shouldReturnEmptyListWhenNoQuestionsAvailable() {
-
         when(questionRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<QuestionResponseDTO> questions = questionService.getAllQuestions();
@@ -69,8 +70,8 @@ public class QuestionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar uma questão por ID com sucesso.")
     void shouldReturnQuestionByIdSuccessfully() {
-
         Question question = new Question();
         question.setId(1L);
         question.setText("Qual é a capital da Paraíba?");
@@ -91,8 +92,8 @@ public class QuestionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção ao tentar buscar questão inexistente por ID")
     void shouldThrowExceptionWhenQuestionNotFoundById() {
-
         when(questionRepository.findById(999L)).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,
@@ -103,8 +104,8 @@ public class QuestionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve salvar uma questão com sucesso")
     void shouldSaveQuestionSuccessfully() {
-
         Question question = new Question();
         question.setId(1L);
         question.setText("Qual é a capital de Pernambuco?");
@@ -121,8 +122,8 @@ public class QuestionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve encontrar uma questão por ID com sucesso")
     void shouldFindQuestionByIdSuccessfully() {
-
         Question question = new Question();
         question.setId(1L);
         question.setText("Qual é a capital do Ceará?");
@@ -137,8 +138,8 @@ public class QuestionServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar um Optional vazio ao buscar uma questão inexistente")
     void shouldReturnEmptyOptionalWhenQuestionNotFoundById() {
-
         when(questionRepository.findById(999L)).thenReturn(Optional.empty());
 
         Optional<Question> result = questionService.findById(999L);
@@ -147,4 +148,54 @@ public class QuestionServiceTest {
         verify(questionRepository, times(1)).findById(999L);
     }
 
+    @Test
+    @DisplayName("Deve lidar com valores extremos de ID (Long.MAX_VALUE)")
+    void shouldHandleExtremeLargeIdValues() {
+        when(questionRepository.findById(Long.MAX_VALUE)).thenReturn(Optional.empty());
+
+        Optional<Question> result = questionService.findById(Long.MAX_VALUE);
+
+        assertTrue(result.isEmpty(), "Optional should be empty when question ID is Long.MAX_VALUE.");
+        verify(questionRepository, times(1)).findById(Long.MAX_VALUE);
+    }
+
+    @Test
+    @DisplayName("Deve lidar com questões com campos nulos")
+    void shouldHandleQuestionWithNullFields() {
+        Question question = new Question();
+        question.setId(1L);
+
+        when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
+        when(questionMapper.toDTO(question)).thenReturn(
+                new QuestionResponseDTO(1L, null, ' ', Collections.emptyList(), null)
+        );
+
+        QuestionResponseDTO questionDTO = questionService.getQuestionById(1L);
+
+        assertNotNull(questionDTO);
+        assertEquals(1L, questionDTO.getId());
+        assertNull(questionDTO.getText(), "Question text should be null.");
+        verify(questionRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve lidar com questões com campos de texto muito grandes")
+    void shouldHandleQuestionWithLargeTextFields() {
+        String longText = "A".repeat(10_000);
+        Question question = new Question();
+        question.setId(1L);
+        question.setText(longText);
+
+        when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
+        when(questionMapper.toDTO(question)).thenReturn(
+                new QuestionResponseDTO(1L, longText, 'A', Collections.emptyList(), null)
+        );
+
+        QuestionResponseDTO questionDTO = questionService.getQuestionById(1L);
+
+        assertNotNull(questionDTO);
+        assertEquals(1L, questionDTO.getId());
+        assertEquals(longText, questionDTO.getText(), "Question text should match the long text.");
+        verify(questionRepository, times(1)).findById(1L);
+    }
 }

@@ -1,4 +1,4 @@
-package com.supera.enem;
+package com.supera.enem.users;
 
 import com.supera.enem.controller.DTOS.Student.StudentDTO;
 import com.supera.enem.controller.DTOS.AddressDTO;
