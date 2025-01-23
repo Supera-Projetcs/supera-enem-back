@@ -155,4 +155,124 @@ class AnswerMapperTest {
         assertEquals(1L, responseDTOs.get(0).getId(), "O primeiro elemento deve ser mapeado corretamente.");
         assertEquals(1000L, responseDTOs.get(999).getId(), "O último elemento deve ser mapeado corretamente.");
     }
+
+    @Test
+    @DisplayName("Deve mapear AnswerRequestDTO para Answer com dados válidos")
+    void shouldMapAnswerRequestDTOToAnswer_WhenDataIsValid() {
+        AnswerRequestDTO requestDTO = new AnswerRequestDTO('A', 1L, 2L);
+
+        Answer answer = answerMapper.toEntity(requestDTO);
+
+        assertNotNull(answer);
+        assertEquals('A', answer.getText());
+    }
+
+    @Test
+    @DisplayName("Deve retornar null ao mapear AnswerRequestDTO nulo")
+    void shouldReturnNull_WhenMappingNullAnswerRequestDTO() {
+        Answer answer = answerMapper.toEntity(null);
+
+        assertNull(answer);
+    }
+
+    @Test
+    @DisplayName("Deve mapear Answer para AnswerResponseDTO com dados válidos")
+    void shouldMapAnswerToAnswerResponseDTO_WhenDataIsValid() {
+        Question question = new Question();
+        question.setId(1L);
+
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId(2L);
+
+        Answer answer = new Answer();
+        answer.setId(3L);
+        answer.setText('B');
+        answer.setCorrect(true);
+        answer.setQuestion(question);
+        answer.setTestEntity(testEntity);
+
+        AnswerResponseDTO responseDTO = answerMapper.toDTO(answer);
+
+        assertNotNull(responseDTO);
+        assertEquals(3L, responseDTO.getId());
+        assertEquals('B', responseDTO.getText());
+        assertTrue(responseDTO.isCorrect());
+        assertEquals(1L, responseDTO.getQuestionId());
+        assertEquals(2L, responseDTO.getTestId());
+    }
+
+    @Test
+    @DisplayName("Deve retornar null ao mapear Answer nulo")
+    void shouldReturnNull_WhenMappingNullAnswer() {
+        AnswerResponseDTO responseDTO = answerMapper.toDTO(null);
+
+        assertNull(responseDTO);
+    }
+
+    @Test
+    @DisplayName("Deve mapear lista de Answers para lista de AnswerResponseDTOs")
+    void shouldMapAnswerListToAnswerResponseDTOList_WhenDataIsValid() {
+        Question question = new Question();
+        question.setId(1L);
+
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId(2L);
+
+        Answer answer1 = new Answer();
+        answer1.setId(3L);
+        answer1.setText('C');
+        answer1.setCorrect(false);
+        answer1.setQuestion(question);
+        answer1.setTestEntity(testEntity);
+
+        Answer answer2 = new Answer();
+        answer2.setId(4L);
+        answer2.setText('D');
+        answer2.setCorrect(true);
+        answer2.setQuestion(question);
+        answer2.setTestEntity(testEntity);
+
+        List<AnswerResponseDTO> responseDTOs = answerMapper.toDTOList(List.of(answer1, answer2));
+
+        assertNotNull(responseDTOs);
+        assertEquals(2, responseDTOs.size());
+        assertEquals(3L, responseDTOs.get(0).getId());
+        assertEquals(4L, responseDTOs.get(1).getId());
+    }
+
+    @Test
+    @DisplayName("Deve retornar lista vazia ao mapear lista de Answers vazia")
+    void shouldReturnEmptyList_WhenMappingEmptyAnswerList() {
+        List<AnswerResponseDTO> responseDTOs = answerMapper.toDTOList(List.of());
+
+        assertNotNull(responseDTOs);
+        assertTrue(responseDTOs.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao mapear lista de Answers contendo null")
+    void shouldThrowException_WhenMappingListWithNullAnswer() {
+        Question question = new Question();
+        question.setId(1L);
+
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId(2L);
+
+        Answer answer = new Answer();
+        answer.setId(3L);
+        answer.setText('C');
+        answer.setCorrect(false);
+        answer.setQuestion(question);
+        answer.setTestEntity(testEntity);
+
+        List<Answer> answers = List.of(answer, null);
+
+        assertThrows(NullPointerException.class, () -> answerMapper.toDTOList(answers));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao mapear lista de Answers nula")
+    void shouldThrowException_WhenMappingNullAnswerList() {
+        assertThrows(NullPointerException.class, () -> answerMapper.toDTOList(null));
+    }
 }
