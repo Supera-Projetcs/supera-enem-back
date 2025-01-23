@@ -32,7 +32,7 @@ public class Beans {
     @Bean
     public Keycloak keycloak(){
 
-
+        System.out.println("BUILDER keycloak");
         return KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(realm)

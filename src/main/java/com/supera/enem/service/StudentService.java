@@ -117,19 +117,20 @@ public class StudentService {
         if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) throw new ResourceAlreadyExists("Estudante com este username já existe.");
 
         if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new ResourceAlreadyExists("E-mail inválido.");
-
+        System.out.println("TO AQUI1");
         validatePassword(studentRecord.getPassword());
-
+        System.out.println("TO AQUI2");
         UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
         String keycloakUserId = keycloakService.createUser(userKeycloakRecord);
-
+        System.out.println("TO AQUI3");
         if (keycloakUserId == null) throw new ResourceAlreadyExists("Erro ao criar usuário no Keycloak.");
 
         Student student = studentMapper.toStudent(studentRecord);
         student.setKeycloakId(keycloakUserId);
         Student savedStudent = studentRepository.save(student);
+        System.out.println("TO AQUI4");
         performanceService.createInitialPerformance(savedStudent.getId(),studentRecord.getInitialPerformaceList());
-
+        System.out.println("TO AQUI5");
         return savedStudent;
     }
 

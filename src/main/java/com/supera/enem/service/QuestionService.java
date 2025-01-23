@@ -15,7 +15,9 @@ import java.util.stream.Collectors;
 public class QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
-    private final QuestionMapper questionMapper = QuestionMapper.INSTANCE;
+
+    @Autowired
+    private QuestionMapper questionMapper;
 
     public List<QuestionResponseDTO> getAllQuestions() {
         return questionRepository.findAll().stream()

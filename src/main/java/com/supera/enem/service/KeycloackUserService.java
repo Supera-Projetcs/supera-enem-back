@@ -2,7 +2,6 @@ package com.supera.enem.service;
 import com.supera.enem.controller.DTOS.Student.UpdatePasswordDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
-import com.supera.enem.exception.KeycloakException;
 import com.supera.enem.exception.ResourceAlreadyExists;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.ws.rs.core.Response;
@@ -35,6 +34,7 @@ public class KeycloackUserService {
     }
 
     public String createUser(UseKeycloakRegistrationDTO userRegistrationRecord) {
+        System.out.println("TO AQUI");
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(userRegistrationRecord.getUsername());

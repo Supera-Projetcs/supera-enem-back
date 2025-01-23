@@ -5,20 +5,16 @@ import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
 
-import com.supera.enem.service.AuthenticationService;
+import com.supera.enem.service.AuthenticatedService;
 import com.supera.enem.service.WeeklyReportService;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/weekly-reports")
@@ -27,7 +23,7 @@ public class WeeklyReportController {
     private WeeklyReportService weeklyReportService;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticatedService authenticationService;
 
     @GetMapping()
     public ResponseEntity<List<WeeklyReportDTO>> getAllWeeklyReportsByStudent() {
