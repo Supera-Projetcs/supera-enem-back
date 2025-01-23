@@ -5,10 +5,13 @@ import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
 import com.supera.enem.domain.Student;
 import com.supera.enem.exception.ResourceAlreadyExists;
+import com.supera.enem.exception.BusinessException;
+import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.StudentMapper;
 
 import com.supera.enem.mapper.UserKeycloakMapper;
 import com.supera.enem.repository.StudentRepository;
+import com.supera.enem.repository.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +34,8 @@ public class StudentService {
     @Autowired
     private UserKeycloakMapper userKeycloakMapper;
 
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     @Autowired
     private PerformanceService performanceService;
@@ -98,32 +103,35 @@ public class StudentService {
 
     private void validatePassword(String password) {
         if (password.length() < 3) {
-            throw new IllegalArgumentException("A senha deve ter pelo menos 3 caracteres.");
+            throw new BusinessException("A senha deve ter pelo menos 3 caracteres.");
         }
         if (!password.matches(".*\\d.*")) { // Verifica se contém pelo menos um número
-            throw new IllegalArgumentException("A senha deve conter pelo menos 1 número.");
+            throw new BusinessException("A senha deve conter pelo menos 1 número.");
         }
         if (!password.matches(".*[A-Z].*")) { // Verifica se contém pelo menos uma letra maiúscula
-            throw new IllegalArgumentException("A senha deve conter pelo menos uma letra maiúscula.");
+            throw new BusinessException("A senha deve conter pelo menos uma letra maiúscula.");
         }
         if (!password.matches(".*[@#!$%^&*].*")) { // Verifica se contém pelo menos um símbolo
-            throw new IllegalArgumentException("A senha deve conter pelo menos um símbolo.");
+            throw new BusinessException("A senha deve conter pelo menos um símbolo.");
         }
     }
 
     public Student createStudent(StudentDTO studentRecord) {
+        System.out.println("TO AQUI24");
         if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new ResourceAlreadyExists("Estudante com este e-mail já existe.");
+        System.out.println("TO AQUI25");
+        if(studentRecord.getInitialPerformaceList().size() < subjectRepository.findAll().size()) throw new BusinessException("Não tem perfomace inicial para todos as matérias.");
 
         if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) throw new ResourceAlreadyExists("Estudante com este username já existe.");
-
-        if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new ResourceAlreadyExists("E-mail inválido.");
+        System.out.println("TO AQUI26");
+        if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new BusinessException("E-mail inválido.");
         System.out.println("TO AQUI1");
         validatePassword(studentRecord.getPassword());
         System.out.println("TO AQUI2");
         UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
         String keycloakUserId = keycloakService.createUser(userKeycloakRecord);
         System.out.println("TO AQUI3");
-        if (keycloakUserId == null) throw new ResourceAlreadyExists("Erro ao criar usuário no Keycloak.");
+        if (keycloakUserId == null) throw new BusinessException("Erro ao criar usuário no Keycloak.");
 
         Student student = studentMapper.toStudent(studentRecord);
         student.setKeycloakId(keycloakUserId);

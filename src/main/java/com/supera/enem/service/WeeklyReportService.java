@@ -76,9 +76,9 @@ public class WeeklyReportService {
         if (existingReport != null) {
             return existingReport;
         }else{
-            String url = "http://alita.yasc.com.br/contents";
+            String url = "http://alita.yasc.com.br/contents/";
             List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(studentId);
-
+            System.out.println(performances);
             System.out.println("URL gerada: " + url);
             System.out.println("Conteúdo da requisição: " + performances);
 

@@ -4,13 +4,16 @@ import com.supera.enem.controller.DTOS.AddressDTO;
 import com.supera.enem.controller.DTOS.Performace.InitialPerformaceRequestDTO;
 import com.supera.enem.domain.enums.Weekday;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class StudentDTO {
 
     @NotNull(message = "Apelido não pode ser nulo.")

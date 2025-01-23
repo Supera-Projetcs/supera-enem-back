@@ -1,13 +1,15 @@
 package com.supera.enem.controller.DTOS.Performace;
 
 import com.supera.enem.controller.DTOS.ContentDTO;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Setter
 @Getter
-@Data
 public class PerformaceResponseDTO {
     private Integer id;
     private Double performanceRate;

@@ -7,6 +7,7 @@ import com.supera.enem.domain.Content;
 import com.supera.enem.domain.Performance;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.Subject;
+import com.supera.enem.exception.BusinessException;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.PerformanceMapper;
 import com.supera.enem.repository.ContentRepository;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class PerformanceService {
@@ -64,20 +66,21 @@ public class PerformanceService {
     }
 
     public List<PerformaceResponseDTO> createInitialPerformance(Long studentId, List<InitialPerformaceRequestDTO> listDto) {
+        System.out.println(listDto);
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Estudante não encontrado"));
 
         List<Content> contents = contentRepository.findAll();
-        List<Performance> performances = new ArrayList<>();
+        List<Performance> performances = new ArrayList<Performance>();
 
         contents.forEach(content -> {
 
-            Double performanceRate = listDto.stream()
-                    .filter(item -> item.getSubjectId().equals(content.getSubject().getId()))
-                    .map(InitialPerformaceRequestDTO::getPerformaceValue)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Performance não encontrada para o subjectId: " + content.getSubject().getId()));
+            Stream<InitialPerformaceRequestDTO> filteredList = listDto.stream().filter(item -> item.getSubjectId().equals(content.getSubject().getId()));
+            Stream<Double> mapList =  filteredList.map(InitialPerformaceRequestDTO::getPerformaceValue);
 
+            Double performanceRate = mapList
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException("Performance não encontrada para o subjectId: " + content.getSubject().getId()));
 
             Performance newPerformance = new Performance();
             newPerformance.setStudent(student); // Associa o estudante
