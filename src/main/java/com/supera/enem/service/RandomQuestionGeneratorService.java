@@ -25,8 +25,21 @@ public class RandomQuestionGeneratorService {
         List<Content> contents = contentRepository.findAll();
         List<Question> allQuestions = questionRepository.findAll();
 
+        if (contents.isEmpty()) {
+            System.out.println("Nenhum conteúdo encontrado. Nada para processar.");
+            return;
+        }
+
+        if (allQuestions.isEmpty()) {
+            System.out.println("Nenhuma pergunta encontrada. Nada para atribuir.");
+            return;
+        }
+
         for (Content content : contents) {
-            List<Question> randomQuestions = getRandomQuestions(allQuestions, 5);
+
+            int questionsToAssign = Math.min(allQuestions.size(), 5);
+
+            List<Question> randomQuestions = getRandomQuestions(allQuestions, questionsToAssign);
 
             for (Question question : randomQuestions) {
                 content.getQuestions().add(question);
@@ -38,7 +51,12 @@ public class RandomQuestionGeneratorService {
             System.out.println("Content ID: " + content.getId() + " - Questions: " + content.getQuestions());
         }
     }
+
     private List<Question> getRandomQuestions(List<Question> questions, int count) {
+        if (questions.size() < count) {
+            throw new IllegalArgumentException("Requested more questions than available");
+        }
+
         Random random = new Random();
         return random.ints(0, questions.size())
                 .distinct()
@@ -46,5 +64,4 @@ public class RandomQuestionGeneratorService {
                 .mapToObj(questions::get)
                 .toList();
     }
-
 }

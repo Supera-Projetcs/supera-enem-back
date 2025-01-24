@@ -13,6 +13,15 @@ public class ImageService {
     private final String uploadDir = "upload/images";
 
     public String saveImage(MultipartFile image) throws IOException {
+
+        if (!image.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("Invalid file format");
+        }
+
+        if (image.isEmpty()) {
+            throw new IOException("The file is empty");
+        }
+
         Path uploadPath = Path.of(uploadDir);
 
         if (!Files.exists(uploadPath)) {
@@ -24,8 +33,9 @@ public class ImageService {
 
         image.transferTo(filePath.toFile());
 
-        return filePath.toString();
+        System.out.println("Caminho gerado: " + filePath.toAbsolutePath().toString());
 
+        return filePath.toAbsolutePath().toString();
     }
-
 }
+
