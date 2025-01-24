@@ -2,32 +2,47 @@ package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.Student.*;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
+import com.supera.enem.controller.DTOS.StudentSubject.*;
 
-import com.supera.enem.domain.Student;
-import com.supera.enem.mapper.StudentMapper;
+import com.supera.enem.domain.*;
 
-import com.supera.enem.mapper.UserKeycloakMapper;
-import com.supera.enem.repository.StudentRepository;
+import com.supera.enem.exception.*;
+import com.supera.enem.mapper.*;
+
+import com.supera.enem.repository.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
 public class StudentService {
 
-    private final StudentRepository studentRepository;
-    private final KeycloackUserService keycloakService;
-    private final StudentMapper studentMapper;
-    private final UserKeycloakMapper userKeycloakMapper;
+    @Autowired
+    private StudentRepository studentRepository;
 
-    public StudentService(StudentRepository studentRepository, KeycloackUserService keycloakImplemantation) {
-        this.studentRepository = studentRepository;
-        this.keycloakService = keycloakImplemantation;
-        this.studentMapper = StudentMapper.INSTANCE;
-        this.userKeycloakMapper = UserKeycloakMapper.INSTANCE;
-    }
+    @Autowired
+    private KeycloackUserService keycloakService;
+
+    @Autowired
+    private StudentMapper studentMapper;
+
+    @Autowired
+    private UserKeycloakMapper userKeycloakMapper;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
+
+    @Autowired
+    private StudentSubjectRepository studentSubjectRepository;
+
+    @Autowired
+    private StudentSubjectMapper studentSubjectMapper;
+
 
     public Student getStudentById(Long id) {
         return studentRepository.findById(id)
@@ -91,36 +106,59 @@ public class StudentService {
 
     private void validatePassword(String password) {
         if (password.length() < 3) {
-            throw new IllegalArgumentException("A senha deve ter pelo menos 3 caracteres.");
+            throw new BusinessException("A senha deve ter pelo menos 3 caracteres.");
         }
         if (!password.matches(".*\\d.*")) { // Verifica se contém pelo menos um número
-            throw new IllegalArgumentException("A senha deve conter pelo menos 1 número.");
+            throw new BusinessException("A senha deve conter pelo menos 1 número.");
         }
         if (!password.matches(".*[A-Z].*")) { // Verifica se contém pelo menos uma letra maiúscula
-            throw new IllegalArgumentException("A senha deve conter pelo menos uma letra maiúscula.");
+            throw new BusinessException("A senha deve conter pelo menos uma letra maiúscula.");
         }
         if (!password.matches(".*[@#!$%^&*].*")) { // Verifica se contém pelo menos um símbolo
-            throw new IllegalArgumentException("A senha deve conter pelo menos um símbolo.");
+            throw new BusinessException("A senha deve conter pelo menos um símbolo.");
         }
     }
 
     public Student createStudent(StudentDTO studentRecord) {
-        if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new IllegalArgumentException("Estudante com este e-mail já existe.");
 
-        if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) throw new IllegalArgumentException("Estudante com este username já existe.");
+        if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new ResourceAlreadyExists("Estudante com este e-mail já existe.");
 
-        if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new IllegalArgumentException("E-mail inválido.");
+        if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) throw new ResourceAlreadyExists("Estudante com este username já existe.");
+
+        if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new BusinessException("E-mail inválido.");
 
         validatePassword(studentRecord.getPassword());
 
         UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
         String keycloakUserId = keycloakService.createUser(userKeycloakRecord);
 
-        if (keycloakUserId == null) throw new IllegalStateException("Erro ao criar usuário no Keycloak.");
+        if (keycloakUserId == null) throw new BusinessException("Erro ao criar usuário no Keycloak.");
 
         Student student = studentMapper.toStudent(studentRecord);
         student.setKeycloakId(keycloakUserId);
+
+
         return studentRepository.save(student);
+    }
+
+    public List<StudentSubjectResponseDTO> createStudentSubjects(Long studentId, List<StudentSubjectRequestDTO> listDto) {
+        if(listDto.size() < subjectRepository.findAll().size()) throw new BusinessException("Falta matéria");
+        Student student = getStudentById(studentId);
+
+        List<StudentSubject> listStudentSubjects = listDto.stream()
+                .map(dto -> {
+            Subject subject = subjectRepository.findById(dto.getSubjectId()).orElse(null);
+            StudentSubject studentSubject = new StudentSubject();
+            studentSubject.setStudent(student);
+            studentSubject.setSubject(subject);
+            studentSubject.setSubjectWeight(dto.getSubjectWeight());
+            return studentSubject;
+
+        }).toList();
+
+        studentSubjectRepository.saveAll(listStudentSubjects);
+
+        return listStudentSubjects.stream().map(studentSubjectMapper::toDto).collect(Collectors.toList());
     }
 
 }

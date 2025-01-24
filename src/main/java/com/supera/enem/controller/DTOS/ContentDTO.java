@@ -1,9 +1,13 @@
 package com.supera.enem.controller.DTOS;
 
 import com.supera.enem.domain.Subject;
-import lombok.Data;
+import lombok.*;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 public class ContentDTO {
     private Long id;
     private String name;

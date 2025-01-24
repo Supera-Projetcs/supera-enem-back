@@ -1,15 +1,15 @@
 package com.supera.enem.controller.DTOS;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 public class QuestionResponseDTO {
     private Long id;
     private String text;

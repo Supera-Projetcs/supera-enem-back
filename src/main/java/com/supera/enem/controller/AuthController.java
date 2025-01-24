@@ -2,7 +2,7 @@ package com.supera.enem.controller;
 
 import com.supera.enem.controller.DTOS.Student.StudentDTO;
 import com.supera.enem.domain.Student;
-import com.supera.enem.service.KeycloackUserService;
+import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +14,14 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/auth")
-
 public class AuthController {
     @Autowired
     private StudentService studentService;
-    @Autowired
-    private KeycloackUserService keycloackUserService;
 
     @PostMapping("/register")
-    public ResponseEntity<Student> createUser(@RequestBody @Valid StudentDTO student) {
-        Student createdStudent = studentService.createStudent(student);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
+    public ResponseEntity<Student> createUser(@Valid @RequestBody StudentDTO student) {
+        return ResponseEntity.ok(studentService.createStudent(student));
     }
-
 
     @GetMapping("/user-logged")
     public ResponseEntity<Student> getUserLogged(HttpServletRequest request){
@@ -37,13 +32,7 @@ public class AuthController {
         }
 
         Student student = studentService.getStudentLogged(authorizationHeader);
-        return ResponseEntity.status(HttpStatus.OK).body(student);
-    }
-
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.ok(student);
     }
 
 

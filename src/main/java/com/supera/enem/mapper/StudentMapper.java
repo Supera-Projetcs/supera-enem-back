@@ -10,10 +10,8 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface StudentMapper {
-    StudentMapper INSTANCE = Mappers.getMapper(StudentMapper.class);
-
     @Mapping(target = "address", source = "address")
     Student toStudent(StudentDTO studentDTO);
 
