@@ -6,6 +6,7 @@ import com.supera.enem.controller.DTOS.StudentSubject.StudentSubjectResponseDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.service.KeycloackUserService;
 import com.supera.enem.service.StudentService;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -66,6 +67,7 @@ public class StudentController {
         Student student = studentService.getStudentById(id);
         return ResponseEntity.ok(student);
     }
+
 
     @PostMapping("/subject-weight/{id}")
     public ResponseEntity<List<StudentSubjectResponseDTO>> createStudentSubject(@PathVariable Long id, @RequestBody List<StudentSubjectRequestDTO> studentSubjectRequestDTOList) {

@@ -7,6 +7,7 @@ import com.supera.enem.domain.WeeklyReport;
 
 import com.supera.enem.service.AuthenticatedService;
 import com.supera.enem.service.WeeklyReportService;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,17 +1,15 @@
 package com.supera.enem.controller.DTOS.Student;
 
 import com.supera.enem.controller.DTOS.AddressDTO;
-import com.supera.enem.controller.DTOS.Performace.InitialPerformaceRequestDTO;
 import com.supera.enem.domain.enums.Weekday;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Set;
-import java.util.List;
+
 
 @Getter
 @Setter
@@ -29,7 +27,6 @@ public class StudentDTO {
     private String phone;
 
     @NotNull(message = "Email não pode ser nulo.")
-    @Email(message = "Email não é válido.")
     private String email;
 
     @NotNull(message = "Aniversário não pode ser nulo.")
