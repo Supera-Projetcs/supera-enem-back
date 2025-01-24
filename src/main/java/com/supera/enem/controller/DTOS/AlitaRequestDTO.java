@@ -10,19 +10,19 @@ import lombok.Setter;
 public class AlitaRequestDTO {
 
     @JsonProperty("ID")
-    private Long ID;
+    private Long id;
     @JsonProperty("Classe")
-    private String Classe;
+    private String classe;
     @JsonProperty("Subclasse")
-    private String Subclasse;
+    private String subclasse;
     @JsonProperty("Desempenho")
-    private Double Desempenho;
+    private Double desempenho;
     @JsonProperty("Peso_da_classe")
-    private Double Peso_da_classe;
+    private Double peso_da_classe;
 
     @JsonProperty("Peso_da_subclasse")
-    private Double Peso_da_subclasse;
+    private Double peso_da_subclasse;
     @JsonProperty("Peso_por_questao")
-    private Double Peso_por_questao;
+    private Double peso_por_questao;
 
 }

@@ -39,7 +39,6 @@ public class WeeklyReportController {
 
     @GetMapping("/week")
     public ResponseEntity<WeeklyReportDTO> getWeeklyReport() {
-
         return ResponseEntity.ok(weeklyReportService.getWeeklyReport());
     }
 
