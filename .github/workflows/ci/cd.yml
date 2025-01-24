@@ -1,0 +1,56 @@
+name: Spring Deployment Workflow
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+      - 'fix/docker-spring'
+
+jobs:
+  Build and Deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adoptopenjdk'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Install dependencies
+        run: mvn install -DskipTests
+
+      - name: Run tests
+        run: mvn test
+
+      - name: Build project
+        run: mvn clean install -DskipTests
+
+      - name: Build Docker image
+        run: docker build -t app .
+
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd ./supera_enem/supera-enem-back
+            git stash
+            git pull --force
+            docker-compose build
+            docker-compose up --force-recreate -d
+            docker image prune -f
