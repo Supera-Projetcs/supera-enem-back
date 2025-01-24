@@ -1,33 +1,28 @@
 package com.supera.enem.service;
 
+import com.supera.enem.controller.DTOS.AlitaRequestDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 
-import com.supera.enem.domain.Content;
+import com.supera.enem.domain.*;
 
-import com.supera.enem.domain.Performance;
 import com.supera.enem.exception.ResourceNotFoundException;
+import com.supera.enem.mapper.PerformanceMapper;
 import com.supera.enem.mapper.WeeklyReportMapper;
-import com.supera.enem.repository.PerformanceRepository;
+import com.supera.enem.repository.*;
 
-import com.supera.enem.domain.Student;
-import com.supera.enem.domain.WeeklyReport;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
-
-import com.supera.enem.repository.ContentRepository;
-import com.supera.enem.repository.WeeklyReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Set;
 
 @Service
 public class WeeklyReportService {
@@ -49,7 +44,12 @@ public class WeeklyReportService {
 
     @Autowired
     private RestTemplate restTemplate;
-
+    @Autowired
+    private PerformanceMapper performanceMapper;
+    @Autowired
+    private StudentSubjectRepository studentSubjectRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
 
     public List<WeeklyReportDTO> getWeeklyReportsByStudent(Student student) {
@@ -64,31 +64,72 @@ public class WeeklyReportService {
       return weeklyReportMapper.toDto(weeklyReport);
     }
 
-    public WeeklyReport getWeeklyReport(Long studentId) {
+    private List<AlitaRequestDTO> getAlitaReportsByStudent(Long studentId) {
+        String url = "http://alita.yasc.com.br/contents/";
+        List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(studentId);
 
+
+        List<AlitaRequestDTO> alitaList =  performances.stream().map(performance -> {
+            Double pesoSubclasse = studentSubjectRepository.findStudentSubjectBySubject_Id(performance.getContent().getSubject().getId()).getSubjectWeight();
+
+            AlitaRequestDTO alitaRequestDTO = new AlitaRequestDTO();
+            alitaRequestDTO.setID(performance.getContent().getId());
+            alitaRequestDTO.setDesempenho(performance.getPerformanceRate());
+            alitaRequestDTO.setPeso_da_classe(performance.getContent().getContent_weight());
+            alitaRequestDTO.setPeso_por_questao(performance.getContent().getQuestion_weight());
+            alitaRequestDTO.setClasse(performance.getContent().getName());
+            alitaRequestDTO.setSubclasse(performance.getContent().getSubject().getName());
+            alitaRequestDTO.setPeso_da_subclasse(pesoSubclasse);
+            return alitaRequestDTO;
+        }).toList();
+
+        try {
+
+            List<AlitaRequestDTO> response =  restTemplate.postForObject(url, alitaList, List.class);
+            System.out.println("Resposta do servidor: " + response);
+
+            return response;
+        } catch (Exception ex) {
+            throw new RuntimeException("Erro ocorreu", ex);
+        }
+
+    }
+
+    private WeeklyReport generateWeeklyReport(List<AlitaRequestDTO> alitaRequestDTOList, Student student) {
+
+        WeeklyReport weeklyReport = new WeeklyReport();
+
+        weeklyReport.setStudent(student);
+        weeklyReport.setDate(new Date());
+
+        Set<Content> contents = alitaRequestDTOList.stream()
+                .map(alitaRequestDTO -> contentRepository.findById(alitaRequestDTO.getID())
+                        .orElseThrow(() -> new RuntimeException("Content not found with ID: " + alitaRequestDTO.getID()))
+                )
+                .collect(Collectors.toSet());  // Coletar os resultados em um Set
+
+        weeklyReport.setContents(contents); // Supondo que WeeklyReport tenha um método setContents()
+
+        return weeklyReport;
+    }
+
+    public WeeklyReportDTO getWeeklyReport() {
+        Student student = authenticatedService.getAuthenticatedStudent();
         LocalDate currentDate = LocalDate.now();
         LocalDate weekStart = currentDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
         LocalDate weekEnd = currentDate.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
 
         WeeklyReport existingReport = weeklyReportRepository
-                .findByStudentIdAndDateBetween(studentId, weekStart, weekEnd);
+                .findByStudentIdAndDateBetween(student.getId(), weekStart, weekEnd);
 
         if (existingReport != null) {
-            return existingReport;
-        }else{
-            String url = "http://alita.yasc.com.br/contents/";
-            List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(studentId);
-            System.out.println(performances);
-            System.out.println("URL gerada: " + url);
-            System.out.println("Conteúdo da requisição: " + performances);
-
-            String response = restTemplate.postForObject(url, performances, String.class);
-
-            System.out.println("Resposta do servidor: " + response);
+            return weeklyReportMapper.toDTO(existingReport);
         }
 
+        List<AlitaRequestDTO> newWeeklyReport = getAlitaReportsByStudent(student.getId());
+        WeeklyReport weeklyReport = generateWeeklyReport(newWeeklyReport, student);
 
-        return null;
+        return  weeklyReportMapper.toDTO(weeklyReportRepository.save(weeklyReport));
     }
 
 

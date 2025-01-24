@@ -2,21 +2,21 @@ package com.supera.enem.service;
 
 import com.supera.enem.controller.DTOS.Student.*;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
+import com.supera.enem.controller.DTOS.StudentSubject.*;
 
-import com.supera.enem.domain.Student;
-import com.supera.enem.exception.ResourceAlreadyExists;
-import com.supera.enem.exception.BusinessException;
-import com.supera.enem.exception.ResourceNotFoundException;
-import com.supera.enem.mapper.StudentMapper;
+import com.supera.enem.domain.*;
 
-import com.supera.enem.mapper.UserKeycloakMapper;
-import com.supera.enem.repository.StudentRepository;
-import com.supera.enem.repository.SubjectRepository;
+import com.supera.enem.exception.*;
+import com.supera.enem.mapper.*;
+
+import com.supera.enem.repository.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -38,7 +38,10 @@ public class StudentService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private PerformanceService performanceService;
+    private StudentSubjectRepository studentSubjectRepository;
+
+    @Autowired
+    private StudentSubjectMapper studentSubjectMapper;
 
 
     public Student getStudentById(Long id) {
@@ -117,29 +120,45 @@ public class StudentService {
     }
 
     public Student createStudent(StudentDTO studentRecord) {
-        System.out.println("TO AQUI24");
+
         if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new ResourceAlreadyExists("Estudante com este e-mail já existe.");
-        System.out.println("TO AQUI25");
-        if(studentRecord.getInitialPerformaceList().size() < subjectRepository.findAll().size()) throw new BusinessException("Não tem perfomace inicial para todos as matérias.");
 
         if (studentRepository.findByUsername(studentRecord.getUsername()).isPresent()) throw new ResourceAlreadyExists("Estudante com este username já existe.");
-        System.out.println("TO AQUI26");
+
         if (!studentRecord.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new BusinessException("E-mail inválido.");
-        System.out.println("TO AQUI1");
+
         validatePassword(studentRecord.getPassword());
-        System.out.println("TO AQUI2");
+
         UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
         String keycloakUserId = keycloakService.createUser(userKeycloakRecord);
-        System.out.println("TO AQUI3");
+
         if (keycloakUserId == null) throw new BusinessException("Erro ao criar usuário no Keycloak.");
 
         Student student = studentMapper.toStudent(studentRecord);
         student.setKeycloakId(keycloakUserId);
-        Student savedStudent = studentRepository.save(student);
-        System.out.println("TO AQUI4");
-        performanceService.createInitialPerformance(savedStudent.getId(),studentRecord.getInitialPerformaceList());
-        System.out.println("TO AQUI5");
-        return savedStudent;
+
+
+        return studentRepository.save(student);
+    }
+
+    public List<StudentSubjectResponseDTO> createStudentSubjects(Long studentId, List<StudentSubjectRequestDTO> listDto) {
+        if(listDto.size() < subjectRepository.findAll().size()) throw new BusinessException("Falta matéria");
+        Student student = getStudentById(studentId);
+
+        List<StudentSubject> listStudentSubjects = listDto.stream()
+                .map(dto -> {
+            Subject subject = subjectRepository.findById(dto.getSubjectId()).orElse(null);
+            StudentSubject studentSubject = new StudentSubject();
+            studentSubject.setStudent(student);
+            studentSubject.setSubject(subject);
+            studentSubject.setSubjectWeight(dto.getSubjectWeight());
+            return studentSubject;
+
+        }).toList();
+
+        studentSubjectRepository.saveAll(listStudentSubjects);
+
+        return listStudentSubjects.stream().map(studentSubjectMapper::toDto).collect(Collectors.toList());
     }
 
 }

@@ -19,8 +19,7 @@ public class AuthController {
     private StudentService studentService;
 
     @PostMapping("/register")
-    public ResponseEntity<Student> createUser(@RequestBody @Valid StudentDTO student) {
-        System.out.println("ENTREI NO CONTROLLER");
+    public ResponseEntity<Student> createUser(@Valid @RequestBody StudentDTO student) {
         return ResponseEntity.ok(studentService.createStudent(student));
     }
 

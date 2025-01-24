@@ -32,7 +32,8 @@ public class PerformanceService {
     @Autowired
     private ContentRepository contentRepository;
 
-
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     @Autowired
     private PerformanceMapper performanceMapper;
@@ -66,6 +67,7 @@ public class PerformanceService {
     }
 
     public List<PerformaceResponseDTO> createInitialPerformance(Long studentId, List<InitialPerformaceRequestDTO> listDto) {
+        if(listDto.size() < subjectRepository.findAll().size()) throw new BusinessException("Não tem perfomace inicial para todos as matérias.");
         System.out.println(listDto);
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Estudante não encontrado"));

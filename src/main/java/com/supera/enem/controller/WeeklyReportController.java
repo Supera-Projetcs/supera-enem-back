@@ -38,11 +38,9 @@ public class WeeklyReportController {
     }
 
     @GetMapping("/week")
-    public ResponseEntity<WeeklyReport> getWeeklyReport() {
-        System.out.println("Yasmin");
-        Student student = authenticationService.getAuthenticatedStudent();
-        System.out.println("Yasmin");
-        return ResponseEntity.ok(weeklyReportService.getWeeklyReport(student.getId()));
+    public ResponseEntity<WeeklyReportDTO> getWeeklyReport() {
+
+        return ResponseEntity.ok(weeklyReportService.getWeeklyReport());
     }
 
     @PostMapping("update/{id}")

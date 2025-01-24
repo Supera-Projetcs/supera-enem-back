@@ -16,15 +16,16 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         System.out.println("restrição");
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/register",
+                                "/api/auth/**",
                                 "/swagger-resources/*",
                                 "/api/docs/**",
                                 "/api/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/v3/api-docs**",
+                                "/api/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
