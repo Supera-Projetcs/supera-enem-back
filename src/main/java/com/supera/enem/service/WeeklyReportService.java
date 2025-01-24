@@ -52,11 +52,6 @@ public class WeeklyReportService {
     private SubjectRepository subjectRepository;
 
 
-    public List<WeeklyReportDTO> getWeeklyReportsByStudent(Student student) {
-        return weeklyReportRepository.findByStudent(student).stream()
-                .map(weeklyReportMapper::toDto)
-                .collect(Collectors.toList());
-    }
 
     public WeeklyReportDTO getWeeklyReportById(Long id, Student student) {
       WeeklyReport weeklyReport =  weeklyReportRepository.findByIdAndStudent(id, student).orElseThrow(()-> new ResourceNotFoundException("WeeklyReport not exist"));

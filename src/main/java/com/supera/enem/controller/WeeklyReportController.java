@@ -26,11 +26,6 @@ public class WeeklyReportController {
     @Autowired
     private AuthenticatedService authenticationService;
 
-    @GetMapping()
-    public ResponseEntity<List<WeeklyReportDTO>> getAllWeeklyReportsByStudent() {
-            Student student = authenticationService.getAuthenticatedStudent();
-            return ResponseEntity.ok(weeklyReportService.getWeeklyReportsByStudent(student));
-    }
 
     @GetMapping("/{id}")
     public WeeklyReportDTO getWeeklyReportById(@PathVariable Long id, @AuthenticationPrincipal Student student) {
