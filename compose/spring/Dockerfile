@@ -9,7 +9,7 @@ COPY pom.xml .
 COPY src ./src
 
 # Build the application and skip tests for faster builds in non-production environments
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Dmaven.test.skip=true
 
 # Stage 2: Create a lightweight runtime image
 FROM eclipse-temurin:17-jre
