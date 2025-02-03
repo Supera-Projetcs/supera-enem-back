@@ -20,3 +20,7 @@ mvn flyway:migrate -Dflyway.outOfOrder=true
 docker exec -it supera_enem_postgres psql -U NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA enem
 ```
 
+## Comando JaCoCo
+mvn test jacoco:report
+
+
