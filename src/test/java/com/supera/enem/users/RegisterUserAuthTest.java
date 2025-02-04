@@ -2,6 +2,8 @@ package com.supera.enem.users;
 
 import com.supera.enem.controller.DTOS.Student.StudentDTO;
 import com.supera.enem.controller.DTOS.AddressDTO;
+import com.supera.enem.mapper.StudentMapper;
+import com.supera.enem.mapper.UserKeycloakMapper;
 import com.supera.enem.service.StudentService;
 import com.supera.enem.service.KeycloackUserService;
 import com.supera.enem.domain.Student;
@@ -28,10 +30,17 @@ public class RegisterUserAuthTest {
     @Mock
     private KeycloackUserService keycloakImplementation;
 
+    @Mock
+    private UserKeycloakMapper userKeycloakMapper;
+
+    @Mock
+    private StudentMapper studentMapper;
+
     @InjectMocks
     private StudentService studentService;
 
     private StudentDTO validStudentDTO;
+
 
     @BeforeEach
     void setUp() {
@@ -65,9 +74,7 @@ public class RegisterUserAuthTest {
         when(keycloakImplementation.createUser(any())).thenReturn("keycloakId123");
         when(studentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-
         Student createdStudent = studentService.createStudent(validStudentDTO);
-
 
         assertNotNull(createdStudent);
         assertEquals("keycloakId123", createdStudent.getKeycloakId());

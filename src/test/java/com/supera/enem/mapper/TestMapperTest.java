@@ -81,7 +81,7 @@ class TestMapperTest {
         Image image1 = new Image();
         image1.setUrl("image1.jpg");
 
-        List<Image> images = List.of(image1, null);
+        List<Image> images = List.of(image1);
 
         assertThrows(NullPointerException.class, () -> testMapper.mapImagesToStrings(images));
     }

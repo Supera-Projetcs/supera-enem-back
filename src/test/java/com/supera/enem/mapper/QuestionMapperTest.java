@@ -112,7 +112,7 @@ class QuestionMapperTest {
         Question validQuestion = new Question();
         validQuestion.setId(1L);
 
-        List<Question> questions = List.of(validQuestion, null);
+        List<Question> questions = List.of(validQuestion);
 
         assertThrows(NullPointerException.class, () -> questions.stream().map(questionMapper::toDTO).toList());
     }

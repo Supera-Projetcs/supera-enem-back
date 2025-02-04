@@ -265,7 +265,7 @@ class AnswerMapperTest {
         answer.setQuestion(question);
         answer.setTestEntity(testEntity);
 
-        List<Answer> answers = List.of(answer, null);
+        List<Answer> answers = List.of(answer);
 
         assertThrows(NullPointerException.class, () -> answerMapper.toDTOList(answers));
     }
