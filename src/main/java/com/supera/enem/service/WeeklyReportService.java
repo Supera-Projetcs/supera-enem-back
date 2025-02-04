@@ -55,14 +55,12 @@ public class WeeklyReportService {
 
     public WeeklyReportDTO getWeeklyReportById(Long id, Student student) {
       WeeklyReport weeklyReport =  weeklyReportRepository.findByIdAndStudent(id, student).orElseThrow(()-> new ResourceNotFoundException("WeeklyReport not exist"));
-
       return weeklyReportMapper.toDto(weeklyReport);
     }
 
     private List<AlitaRequestDTO> getAlitaReportsByStudent(Long studentId) {
         String url = "http://alita.yasc.com.br/contents/";
         List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(studentId);
-
 
         List<AlitaRequestDTO> alitaList =  performances.stream().map(performance -> {
             Double pesoSubclasse = studentSubjectRepository.findStudentSubjectBySubject_Id(performance.getContent().getSubject().getId()).getSubjectWeight();
@@ -96,32 +94,31 @@ public class WeeklyReportService {
         weeklyReport.setStudent(student);
         weeklyReport.setDate(new Date());
         Set<Content> contents = rawList.stream()
-                .map(obj -> {
-                    Long id = null;
+            .map(obj -> {
+                Long id = null;
 
-                    if (obj instanceof LinkedHashMap<?, ?> map) {
-                        Object idObj = map.get("ID");
-                        if (idObj instanceof Number) {
-                            id = ((Number) idObj).longValue();
-                        }
+                if (obj instanceof LinkedHashMap<?, ?> map) {
+                    Object idObj = map.get("ID");
+                    if (idObj instanceof Number) {
+                        id = ((Number) idObj).longValue();
                     }
+                }
 
-                    if (id == null)
-                        return null;
+                if (id == null)
+                    return null;
 
-                    Content content = contentRepository.findById(id).orElse(null);
+                Content content = contentRepository.findById(id).orElse(null);
 
-                    if (content == null)
-                        System.out.println("Content not found with ID: " + id);
+                if (content == null)
+                    System.out.println("Content not found with ID: " + id);
 
 
-                    return content;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                return content;
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
 
-        System.out.println(contents);
-         weeklyReport.setContents(contents);
+        weeklyReport.setContents(contents);
 
         return weeklyReport;
     }
@@ -145,9 +142,6 @@ public class WeeklyReportService {
         return  weeklyReportMapper.toDTO(weeklyReportRepository.save(weeklyReport));
     }
 
-
-
-
     public WeeklyReportDTO updateWeeklyReport(WeeklyReportRequestDTO weeklyReportRequestDTO, Long id) {
         authenticatedService.getAuthenticatedStudent();
 
@@ -167,6 +161,5 @@ public class WeeklyReportService {
 
         return weeklyReportMapper.toDTO(updatedReport);
     }
-
 
 }
