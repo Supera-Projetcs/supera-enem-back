@@ -66,7 +66,9 @@ public class AnswerServiceTest {
     }
 
     private Student mockStudent() {
-        Student student = new Student();
+        Student student = mock(Student.class);
+        when(student.getKeycloakId()).thenReturn("keycloakId");
+        when(student.getId()).thenReturn(1L);
         student.setKeycloakId("keycloakId");
         student.setId(1L);
         return student;
@@ -92,12 +94,25 @@ public class AnswerServiceTest {
         answer.setId(1L);
         answer.setCorrect(true);
 
+        Content content = new Content();
+        content.setId(1L);
+        content.setName("Math");
+
+        Set<Content> contents = new HashSet<>();
+        contents.add(content);
+
+        question.setContents(contents);
+
         when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
         when(testRepository.findById(1L)).thenReturn(Optional.of(test));
         when(answerRepository.existsByTestEntityAndQuestion(test, question)).thenReturn(false);
         when(answerMapper.toEntity(requestDTO)).thenReturn(answer);
         when(answerRepository.save(any(Answer.class))).thenReturn(answer);
-        when(answerMapper.toDTO(any(Answer.class))).thenReturn(new AnswerResponseDTO(1L, 'A', true, 1L, 1L));
+        when(performanceRepository.findByStudentAndContent(student, content)).thenReturn(Optional.empty());
+
+        when(answerMapper.toDTO(any(Answer.class))).thenReturn(
+                new AnswerResponseDTO(1L, 'A', true, question.getId(), test.getId())
+        );
 
         AnswerResponseDTO response = answerService.createAnswer(requestDTO);
 
