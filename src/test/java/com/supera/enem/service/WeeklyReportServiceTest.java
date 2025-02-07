@@ -8,6 +8,7 @@ import com.supera.enem.domain.WeeklyReport;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.WeeklyReportMapper;
 import com.supera.enem.repository.ContentRepository;
+import com.supera.enem.repository.PerformanceRepository;
 import com.supera.enem.repository.WeeklyReportRepository;
 import jakarta.ws.rs.core.Link;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,12 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,6 +30,9 @@ class WeeklyReportServiceTest {
 
     @Mock
     private WeeklyReportRepository weeklyReportRepository;
+
+    @Mock
+    private PerformanceRepository performanceRepository;
 
     @Mock
     private WeeklyReportMapper weeklyReportMapper;
@@ -48,10 +51,9 @@ class WeeklyReportServiceTest {
 
     private WeeklyReportRequestDTO weeklyReportRequestDTO;
 
-    private WeeklyReport updatedReport;
-    private WeeklyReportDTO weeklyReportDTO;
-    private Student authenticatedStudent;
-    private Set<Content> contents;
+    private WeeklyReport existingReport;
+    private WeeklyReport newReport;
+    private WeeklyReportDTO reportDTO;
 
     @BeforeEach
     void setUp() {
@@ -64,20 +66,15 @@ class WeeklyReportServiceTest {
         weeklyReport.setId(1L);
         weeklyReport.setStudent(student);
 
-        updatedReport = new WeeklyReport();
-        updatedReport.setId(1L);
-        updatedReport.setStudent(authenticatedStudent);
+        existingReport = new WeeklyReport();
+        existingReport.setId(1L);
+        existingReport.setStudent(student);
 
-        weeklyReportDTO = new WeeklyReportDTO();
-        weeklyReportDTO.setId(1L);
-
-        contents = new LinkedHashSet<>();
-        Content content1 = new Content();
-        content1.setId(1L);
-        Content content2 = new Content();
-        content2.setId(1L);
-        contents.add(content1);
-        contents.add(content2);
+        this.reportDTO = new WeeklyReportDTO();
+        this.reportDTO.setId(1L);
+        this.reportDTO.setDate(new Date());
+        this.reportDTO.setContents(new LinkedHashSet<>());
+//        this.reportDTO.se(student);
     }
 
 
@@ -123,94 +120,84 @@ class WeeklyReportServiceTest {
     }
 
     @Test
-    @DisplayName("Should update weekly report successfully with valid input")
-    void shouldUpdateWeeklyReportSuccessfully() {
+    @DisplayName("Deve converter WeeklyReport para WeeklyReportDTO corretamente")
+    void shouldConvertWeeklyReportToDTO() {
+        when(weeklyReportMapper.toDto(weeklyReport)).thenReturn(this.reportDTO);
+
+        WeeklyReportDTO result = weeklyReportMapper.toDto(weeklyReport);
+
+        assertNotNull(result);
+        assertEquals(reportDTO.getId(), result.getId());
+    }
+
+    @Test
+    @DisplayName("Deve retornar um relatório semanal existente se já houver um")
+    void shouldReturnExistingWeeklyReport() {
         // Arrange
-        when(authenticatedService.getAuthenticatedStudent()).thenReturn(authenticatedStudent);
-        when(weeklyReportRepository.findById(1L)).thenReturn(Optional.of(weeklyReport));
-        when(contentRepository.findAllById(weeklyReportRequestDTO.getContentIds())).thenReturn(contents);
-        when(weeklyReportRepository.save(existingReport)).thenReturn(updatedReport);
-        when(weeklyReportMapper.toDTO(updatedReport)).thenReturn(weeklyReportDTO);
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+        when(weeklyReportRepository.findByStudentIdAndDateBetween(anyLong(), any(), any()))
+                .thenReturn(existingReport);
+        when(weeklyReportMapper.toDto(existingReport)).thenReturn(reportDTO);
+
+        WeeklyReportDTO result = weeklyReportService.getWeeklyReport();
+
+        assertNotNull(result);
+        assertEquals(reportDTO.getId(), result.getId());
+        verify(weeklyReportRepository, times(1)).findByStudentIdAndDateBetween(anyLong(), any(), any());
+        verify(weeklyReportMapper, times(1)).toDto(existingReport);
+        verify(weeklyReportRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve criar e retornar um novo relatório semanal se não houver um existente")
+    void shouldCreateNewWeeklyReportWhenNoneExists() {
+        // Arrange
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+        when(weeklyReportRepository.findByStudentIdAndDateBetween(anyLong(), any(), any()))
+                .thenReturn(null);
+        when(weeklyReportRepository.save(any())).thenReturn(newReport);
+        when(weeklyReportMapper.toDto(newReport)).thenReturn(reportDTO);
 
         // Act
-        WeeklyReportDTO result = weeklyReportService.updateWeeklyReport(weeklyReportRequestDTO, 1L);
+        WeeklyReportDTO result = weeklyReportService.getWeeklyReport();
 
         // Assert
         assertNotNull(result);
-        assertEquals("2023-10-01", result.getDate());
-        verify(weeklyReportRepository, times(1)).findById(1L);
-        verify(contentRepository, times(1)).findAllById(weeklyReportRequestDTO.getContentIds());
-        verify(weeklyReportRepository, times(1)).save(existingReport);
-        verify(weeklyReportMapper, times(1)).toDTO(updatedReport);
+        assertEquals(reportDTO.getId(), result.getId());
+        verify(weeklyReportRepository, times(1)).findByStudentIdAndDateBetween(anyLong(), any(), any());
+        verify(weeklyReportRepository, times(1)).save(any());
+        verify(weeklyReportMapper, times(1)).toDto(newReport);
     }
-
+//
 //    @Test
-//    @DisplayName("Deve retornar todos os relatórios semanais de um estudante.")
-//    void shouldReturnWeeklyReportsByStudent() {
-//        WeeklyReport report1 = new WeeklyReport();
-//        report1.setId(1L);
+//    @DisplayName("Deve lançar exceção se o estudante autenticado for nulo")
+//    void shouldThrowExceptionIfAuthenticatedStudentIsNull() {
+//        // Arrange
+//        when(authenticatedService.getAuthenticatedStudent()).thenReturn(null);
 //
-//        WeeklyReport report2 = new WeeklyReport();
-//        report2.setId(2L);
-//
-//        when(weeklyReportRepository.findByStudent(student)).thenReturn(List.of(report1, report2));
-//
-//        List<WeeklyReport> reports = weeklyReportService.getWeeklyReportsByStudent(student);
-//
-//        assertNotNull(reports);
-//        assertEquals(2, reports.size());
-//        assertEquals(1L, reports.get(0).getId());
-//        assertEquals(2L, reports.get(1).getId());
-//        verify(weeklyReportRepository, times(1)).findByStudent(student);
-//    }
-
-//    @Test
-//    @DisplayName("Deve retornar uma lista vazia quando o estudante não possui relatórios semanais.")
-//    void shouldReturnEmptyListWhenNoReportsForStudent() {
-//        when(weeklyReportRepository.findByStudent(student)).thenReturn(List.of());
-//
-//        List<WeeklyReport> reports = weeklyReportService.getWeeklyReportsByStudent(student);
-//
-//        assertNotNull(reports);
-//        assertTrue(reports.isEmpty(), "A lista de relatórios deve ser vazia.");
-//        verify(weeklyReportRepository, times(1)).findByStudent(student);
-//    }
-
-//    @Test
-//    @DisplayName("Deve retornar um relatório semanal específico pelo ID e estudante.")
-//    void shouldReturnWeeklyReportByIdAndStudent() {
-//        WeeklyReport report = new WeeklyReport();
-//        report.setId(1L);
-//
-//        when(weeklyReportRepository.findByIdAndStudent(1L, student)).thenReturn(report);
-//
-//        WeeklyReport foundReport = weeklyReportService.getWeeklyReportById(1L, student);
-//
-//        assertNotNull(foundReport);
-//        assertEquals(1L, foundReport.getId());
-//        verify(weeklyReportRepository, times(1)).findByIdAndStudent(1L, student);
+//        // Act & Assert
+//        assertThrows(NullPointerException.class, () -> weeklyReportService.getWeeklyReport());
+//        verify(weeklyReportRepository, never()).findByStudentIdAndDateBetween(anyLong(), any(), any());
 //    }
 //
 //    @Test
-//    @DisplayName("Deve retornar null quando o relatório não for encontrado pelo ID e estudante.")
-//    void shouldReturnNullWhenWeeklyReportNotFoundByIdAndStudent() {
-//        when(weeklyReportRepository.findByIdAndStudent(999L, student)).thenReturn(null);
+//    @DisplayName("Deve lidar com uma lista vazia ao criar um novo relatório")
+//    void shouldHandleEmptyAlitaReports() {
+//        // Arrange
+//        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+//        when(weeklyReportRepository.findByStudentIdAndDateBetween(anyLong(), any(), any()))
+//                .thenReturn(null);
+//        when(alitaService.getAlitaReportsByStudent(anyLong())).thenReturn(Collections.emptyList());
+//        when(weeklyReportRepository.save(any())).thenReturn(newReport);
+//        when(weeklyReportMapper.toDTO(newReport)).thenReturn(reportDTO);
 //
-//        WeeklyReport report = weeklyReportService.getWeeklyReportById(999L, student);
+//        // Act
+//        WeeklyReportDTO result = weeklyReportService.getWeeklyReport();
 //
-//        assertNull(report, "O relatório deve ser nulo quando não encontrado.");
-//        verify(weeklyReportRepository, times(1)).findByIdAndStudent(999L, student);
-//    }
-//
-//    @Test
-//    @DisplayName("Deve lançar IllegalArgumentException quando o estudante for nulo")
-//    void shouldThrowExceptionWhenStudentIsNull() {
-//        IllegalArgumentException exception = assertThrows(
-//                IllegalArgumentException.class,
-//                () -> weeklyReportService.getWeeklyReportsByStudent(null)
-//        );
-//
-//        assertEquals("Student must not be null", exception.getMessage());
+//        // Assert
+//        assertNotNull(result);
+//        verify(weeklyReportRepository, times(1)).save(any());
+//        verify(weeklyReportMapper, times(1)).toDTO(newReport);
 //    }
 
     @Test

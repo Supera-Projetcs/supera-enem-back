@@ -14,5 +14,5 @@ public interface WeeklyReportMapper {
     WeeklyReportDTO toDto(WeeklyReport weeklyReport);
     WeeklyReport toEntity(WeeklyReportRequestDTO reportResponseDTO);
 
-    WeeklyReportDTO toDTO(WeeklyReport weeklyReport);
+//    WeeklyReportDTO toDTO(WeeklyReport weeklyReport);
 }
