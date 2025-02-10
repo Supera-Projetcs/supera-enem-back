@@ -1,14 +1,17 @@
 package com.supera.enem.service;
 
+import com.supera.enem.controller.DTOS.AlitaRequestDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 import com.supera.enem.domain.Content;
+import com.supera.enem.domain.Performance;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.WeeklyReportMapper;
 import com.supera.enem.repository.ContentRepository;
 import com.supera.enem.repository.PerformanceRepository;
+import com.supera.enem.repository.StudentSubjectRepository;
 import com.supera.enem.repository.WeeklyReportRepository;
 import jakarta.ws.rs.core.Link;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
 
 import javax.swing.*;
 import java.time.LocalDate;
@@ -35,6 +39,9 @@ class WeeklyReportServiceTest {
     private PerformanceRepository performanceRepository;
 
     @Mock
+    private StudentSubjectRepository studentSubjectRepository;
+
+    @Mock
     private WeeklyReportMapper weeklyReportMapper;
 
     private Student student;
@@ -47,9 +54,14 @@ class WeeklyReportServiceTest {
     private AuthenticatedService authenticatedService;
 
     @Mock
+    private RestTemplate restTemplate;
+
+    @Mock
     private ContentRepository contentRepository;
 
     private WeeklyReportRequestDTO weeklyReportRequestDTO;
+
+    private Performance performance;
 
     private WeeklyReport existingReport;
     private WeeklyReport newReport;
@@ -157,6 +169,9 @@ class WeeklyReportServiceTest {
                 .thenReturn(null);
         when(weeklyReportRepository.save(any())).thenReturn(newReport);
         when(weeklyReportMapper.toDto(newReport)).thenReturn(reportDTO);
+        when(restTemplate.postForObject(anyString(), any(), eq(List.class)))
+                .thenReturn(Collections.emptyList());
+
 
         // Act
         WeeklyReportDTO result = weeklyReportService.getWeeklyReport();
@@ -168,37 +183,96 @@ class WeeklyReportServiceTest {
         verify(weeklyReportRepository, times(1)).save(any());
         verify(weeklyReportMapper, times(1)).toDto(newReport);
     }
-//
-//    @Test
-//    @DisplayName("Deve lançar exceção se o estudante autenticado for nulo")
-//    void shouldThrowExceptionIfAuthenticatedStudentIsNull() {
-//        // Arrange
-//        when(authenticatedService.getAuthenticatedStudent()).thenReturn(null);
-//
-//        // Act & Assert
-//        assertThrows(NullPointerException.class, () -> weeklyReportService.getWeeklyReport());
-//        verify(weeklyReportRepository, never()).findByStudentIdAndDateBetween(anyLong(), any(), any());
-//    }
-//
-//    @Test
-//    @DisplayName("Deve lidar com uma lista vazia ao criar um novo relatório")
-//    void shouldHandleEmptyAlitaReports() {
-//        // Arrange
-//        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
-//        when(weeklyReportRepository.findByStudentIdAndDateBetween(anyLong(), any(), any()))
-//                .thenReturn(null);
-//        when(alitaService.getAlitaReportsByStudent(anyLong())).thenReturn(Collections.emptyList());
-//        when(weeklyReportRepository.save(any())).thenReturn(newReport);
-//        when(weeklyReportMapper.toDTO(newReport)).thenReturn(reportDTO);
-//
-//        // Act
-//        WeeklyReportDTO result = weeklyReportService.getWeeklyReport();
-//
-//        // Assert
-//        assertNotNull(result);
-//        verify(weeklyReportRepository, times(1)).save(any());
-//        verify(weeklyReportMapper, times(1)).toDTO(newReport);
-//    }
+
+    @Test
+    @DisplayName("Deve atualizar o WeeklyReport com novos conteúdos")
+    void shouldUpdateWeeklyReportWithNewContents() {
+        // Arrange
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+        when(weeklyReportRepository.findById(1L)).thenReturn(Optional.of(existingReport));
+
+        // Dados de entrada
+        WeeklyReportRequestDTO requestDTO = new WeeklyReportRequestDTO();
+        requestDTO.setContentIds(Arrays.asList(101L, 102L));
+
+        // Conteúdos mockados
+        Content content1 = new Content();
+        content1.setId(101L);
+        Content content2 = new Content();
+        content2.setId(102L);
+
+        when(contentRepository.findAllById(requestDTO.getContentIds()))
+                .thenReturn(Arrays.asList(content1, content2));
+
+        WeeklyReport updatedReport = new WeeklyReport();
+        updatedReport.setId(1L);
+        updatedReport.setDate(requestDTO.getDate());
+        updatedReport.setContents(new LinkedHashSet<>(Arrays.asList(content1, content2)));
+
+        when(weeklyReportRepository.save(existingReport)).thenReturn(updatedReport);
+        when(weeklyReportMapper.toDto(updatedReport)).thenReturn(reportDTO);
+
+        // Act
+        WeeklyReportDTO result = weeklyReportService.updateWeeklyReport(requestDTO, 1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(requestDTO.getDate(), updatedReport.getDate());
+        assertEquals(2, updatedReport.getContents().size());
+        verify(weeklyReportRepository).findById(1L);
+        verify(contentRepository).findAllById(requestDTO.getContentIds());
+        verify(weeklyReportRepository).save(existingReport);
+        verify(weeklyReportMapper).toDto(updatedReport);
+    }
+
+    @Test
+    @DisplayName("Deve limpar conteúdos quando contentIds estiver vazio")
+    void shouldClearContentsWhenContentIdsIsEmpty() {
+        // Arrange
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+        when(weeklyReportRepository.findById(1L)).thenReturn(Optional.of(existingReport));
+
+        WeeklyReportRequestDTO requestDTO = new WeeklyReportRequestDTO();
+        requestDTO.setContentIds(Collections.emptyList());
+
+        existingReport.setContents(new LinkedHashSet<>(Arrays.asList(new Content(), new Content())));
+
+        WeeklyReport updatedReport = new WeeklyReport();
+        updatedReport.setId(1L);
+        updatedReport.setDate(requestDTO.getDate());
+        updatedReport.setContents(Collections.emptySet());
+
+        when(weeklyReportRepository.save(existingReport)).thenReturn(updatedReport);
+        when(weeklyReportMapper.toDto(updatedReport)).thenReturn(reportDTO);
+
+        // Act
+        WeeklyReportDTO result = weeklyReportService.updateWeeklyReport(requestDTO, 1L);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(updatedReport.getContents().isEmpty());
+        verify(weeklyReportRepository).findById(1L);
+        verify(weeklyReportRepository).save(existingReport);
+        verify(weeklyReportMapper).toDto(updatedReport);
+    }
+
+    @Test
+    @DisplayName("Deve lançar ResourceNotFoundException quando o WeeklyReport não existir")
+    void shouldThrowExceptionWhenWeeklyReportNotFound() {
+        // Arrange
+        when(weeklyReportRepository.findById(999L)).thenReturn(Optional.empty());
+
+        WeeklyReportRequestDTO requestDTO = new WeeklyReportRequestDTO();
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            weeklyReportService.updateWeeklyReport(requestDTO, 999L);
+        });
+
+        assertEquals("WeeklyReport not found with ID: 999", exception.getMessage());
+        verify(weeklyReportRepository).findById(999L);
+        verify(weeklyReportRepository, never()).save(any());
+    }
 
     @Test
     @DisplayName("Deve lançar IllegalArgumentException quando ID for nulo.")
