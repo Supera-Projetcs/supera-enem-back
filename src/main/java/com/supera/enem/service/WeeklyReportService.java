@@ -55,14 +55,12 @@ public class WeeklyReportService {
 
     public WeeklyReportDTO getWeeklyReportById(Long id, Student student) {
       WeeklyReport weeklyReport =  weeklyReportRepository.findByIdAndStudent(id, student).orElseThrow(()-> new ResourceNotFoundException("WeeklyReport not exist"));
-
       return weeklyReportMapper.toDto(weeklyReport);
     }
 
     private List<AlitaRequestDTO> getAlitaReportsByStudent(Long studentId) {
         String url = "http://alita.yasc.com.br/contents/";
         List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(studentId);
-
 
         List<AlitaRequestDTO> alitaList =  performances.stream().map(performance -> {
             Double pesoSubclasse = studentSubjectRepository.findStudentSubjectBySubject_Id(performance.getContent().getSubject().getId()).getSubjectWeight();
@@ -79,10 +77,10 @@ public class WeeklyReportService {
         }).toList();
 
         try {
-
+            System.out.println("Enviando requisição para o servidor: " + alitaList);
+            System.out.println("URL: " + url);
             List<AlitaRequestDTO> response =  restTemplate.postForObject(url, alitaList, List.class);
             System.out.println("Resposta do servidor: " + response);
-
             return response;
         } catch (Exception ex) {
             throw new RuntimeException("Erro ocorreu", ex);
@@ -96,32 +94,31 @@ public class WeeklyReportService {
         weeklyReport.setStudent(student);
         weeklyReport.setDate(new Date());
         Set<Content> contents = rawList.stream()
-                .map(obj -> {
-                    Long id = null;
+            .map(obj -> {
+                Long id = null;
 
-                    if (obj instanceof LinkedHashMap<?, ?> map) {
-                        Object idObj = map.get("ID");
-                        if (idObj instanceof Number) {
-                            id = ((Number) idObj).longValue();
-                        }
+                if (obj instanceof LinkedHashMap<?, ?> map) {
+                    Object idObj = map.get("ID");
+                    if (idObj instanceof Number) {
+                        id = ((Number) idObj).longValue();
                     }
+                }
 
-                    if (id == null)
-                        return null;
+                if (id == null)
+                    return null;
 
-                    Content content = contentRepository.findById(id).orElse(null);
+                Content content = contentRepository.findById(id).orElse(null);
 
-                    if (content == null)
-                        System.out.println("Content not found with ID: " + id);
+                if (content == null)
+                    System.out.println("Content not found with ID: " + id);
 
 
-                    return content;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                return content;
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
 
-        System.out.println(contents);
-         weeklyReport.setContents(contents);
+        weeklyReport.setContents(contents);
 
         return weeklyReport;
     }
@@ -136,17 +133,16 @@ public class WeeklyReportService {
                 .findByStudentIdAndDateBetween(student.getId(), weekStart, weekEnd);
 
         if (existingReport != null) {
-            return weeklyReportMapper.toDTO(existingReport);
+            return weeklyReportMapper.toDto(existingReport);
         }
+
+        System.out.println("Generating new weekly report for student: " + student.getId());
 
         List<AlitaRequestDTO> newWeeklyReport = getAlitaReportsByStudent(student.getId());
         WeeklyReport weeklyReport = generateWeeklyReport(newWeeklyReport, student);
         System.out.println(weeklyReport);
-        return  weeklyReportMapper.toDTO(weeklyReportRepository.save(weeklyReport));
+        return  weeklyReportMapper.toDto(weeklyReportRepository.save(weeklyReport));
     }
-
-
-
 
     public WeeklyReportDTO updateWeeklyReport(WeeklyReportRequestDTO weeklyReportRequestDTO, Long id) {
         authenticatedService.getAuthenticatedStudent();
@@ -165,8 +161,7 @@ public class WeeklyReportService {
 
         WeeklyReport updatedReport = weeklyReportRepository.save(existingReport);
 
-        return weeklyReportMapper.toDTO(updatedReport);
+        return weeklyReportMapper.toDto(updatedReport);
     }
-
 
 }
