@@ -61,6 +61,9 @@ public class AnswerService {
         answer.setQuestion(question);
         answer.setTestEntity(test);
         answerRepository.save(answer);
+        System.out.println("Answer: " + answer);
+        System.out.println("Answer question: " + answer.getQuestion());
+        System.out.println("Answer testEntity: " + answer.getTestEntity());
         updatePerformance(answer);
         return answerMapper.toDTO(answer);
     }
