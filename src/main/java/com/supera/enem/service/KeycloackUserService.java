@@ -34,7 +34,6 @@ public class KeycloackUserService {
     }
 
     public String createUser(UseKeycloakRegistrationDTO userRegistrationRecord) {
-        System.out.println("TO AQUI");
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(userRegistrationRecord.getUsername());
