@@ -3,6 +3,7 @@ import com.supera.enem.controller.DTOS.Student.UpdatePasswordDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
 import com.supera.enem.exception.ResourceAlreadyExists;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.ws.rs.core.Response;
 
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Setter
 public class KeycloackUserService {
 
     @Value("${keycloak.realm-server}")
@@ -131,8 +133,12 @@ public class KeycloackUserService {
     }
 
     private UsersResource getUsersResource() {
+        System.out.println("prostituta");
+        System.out.println("Realm: " + realm);
         RealmResource realmResource = keycloak.realm(realm);
         return realmResource.users();
     }
+
+
 
 }
