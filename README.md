@@ -25,4 +25,7 @@ docker exec -it supera_enem_postgres psql -U NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA en
 
 mvn jacoco:report
 
+mvn test -Dtest=
+
+
 
