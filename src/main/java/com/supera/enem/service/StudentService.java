@@ -55,9 +55,9 @@ public class StudentService {
 
 
     public Student updateEmailStudent(Long id, String newEmail) {
-        Student student = getStudentById(id);
-
         if (newEmail == null || newEmail.isEmpty()) throw new IllegalArgumentException("E-mail não pode ser nulo.");
+
+        Student student = getStudentById(id);
 
         if(!newEmail.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new IllegalArgumentException("E-mail invalido.");
 
