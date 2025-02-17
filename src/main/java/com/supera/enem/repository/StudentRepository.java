@@ -10,6 +10,4 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Optional<Student> findByUsername(String username);
     Student findByKeycloakId(String keycloakId);
     Boolean existsByEmail(String email);
-
-
 }

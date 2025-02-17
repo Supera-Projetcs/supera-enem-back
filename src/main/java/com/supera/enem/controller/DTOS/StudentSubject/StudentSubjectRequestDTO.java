@@ -8,6 +8,8 @@ import lombok.*;
 @Data
 @Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class StudentSubjectRequestDTO {
     @Schema(description = "ID da matéria", required = true)
     @NotNull(message = "Id não pode ser nulo.")

@@ -55,9 +55,9 @@ public class StudentService {
 
 
     public Student updateEmailStudent(Long id, String newEmail) {
-        Student student = getStudentById(id);
-
         if (newEmail == null || newEmail.isEmpty()) throw new IllegalArgumentException("E-mail não pode ser nulo.");
+
+        Student student = getStudentById(id);
 
         if(!newEmail.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) throw new IllegalArgumentException("E-mail invalido.");
 
@@ -105,7 +105,7 @@ public class StudentService {
     }
 
     private void validatePassword(String password) {
-        if (password.length() < 3) {
+        if (password.length() <= 3) {
             throw new BusinessException("A senha deve ter pelo menos 3 caracteres.");
         }
         if (!password.matches(".*\\d.*")) { // Verifica se contém pelo menos um número
@@ -160,5 +160,7 @@ public class StudentService {
 
         return listStudentSubjects.stream().map(studentSubjectMapper::toDto).collect(Collectors.toList());
     }
+
+
 
 }
