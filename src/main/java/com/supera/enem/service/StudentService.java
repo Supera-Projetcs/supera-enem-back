@@ -105,7 +105,7 @@ public class StudentService {
     }
 
     private void validatePassword(String password) {
-        if (password.length() < 3) {
+        if (password.length() <= 3) {
             throw new BusinessException("A senha deve ter pelo menos 3 caracteres.");
         }
         if (!password.matches(".*\\d.*")) { // Verifica se contém pelo menos um número

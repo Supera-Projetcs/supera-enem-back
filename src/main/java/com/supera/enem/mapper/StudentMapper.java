@@ -15,6 +15,6 @@ public interface StudentMapper {
     @Mapping(target = "address", source = "address")
     Student toStudent(StudentDTO studentDTO);
 
-    @Mapping(target = "id", ignore = true)  // Ignora o ID durante a atualização
+    @Mapping(target = "id", ignore = true)
     void updateStudentFromDTO(UpdateStudentDTO studentDTO, @MappingTarget Student student);
 }
