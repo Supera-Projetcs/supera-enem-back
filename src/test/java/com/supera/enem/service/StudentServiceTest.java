@@ -96,4 +96,58 @@ public class StudentServiceTest {
         assertEquals("Este e-mail já está sendo usado por outro estudante.", exception.getMessage());
     }
 
+    @Test
+    void shouldThrowExceptionWhenUsernameIsNull() {
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            studentService.updateUsernameStudent(1L, null);
+        });
+
+        assertEquals("Username é obrigatório.", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUsernameIsEmpty() {
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            studentService.updateUsernameStudent(1L, "");
+        });
+
+        assertEquals("Username é obrigatório.", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUsernameAlreadyExists() {
+        Student anotherStudent = new Student();
+        anotherStudent.setId(2L);
+        anotherStudent.setUsername("newUsername");
+
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(studentRepository.findByUsername("newUsername")).thenReturn(Optional.of(anotherStudent));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            studentService.updateUsernameStudent(1L, "newUsername");
+        });
+
+        assertEquals("Este username já está sendo usado por outro estudante.", exception.getMessage());
+    }
+
+    @Test
+    void shouldUpdateUsernameSuccessfully() {
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(studentRepository.findByUsername("newUsername")).thenReturn(Optional.empty());
+
+        doNothing().when(keycloakService).updateUsername("keycloak-123", "newUsername");
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+
+        Student updatedStudent = studentService.updateUsernameStudent(1L, "newUsername");
+
+        assertNotNull(updatedStudent);
+        assertEquals("newUsername", updatedStudent.getUsername());
+        verify(keycloakService, times(1)).updateUsername("keycloak-id-123", "newUsername");
+        verify(studentRepository, times(1)).save(student);
+    }
+
 }
