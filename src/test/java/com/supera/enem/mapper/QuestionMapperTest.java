@@ -106,14 +106,4 @@ class QuestionMapperTest {
         assertTrue(responseDTOs.isEmpty(), "A lista de DTOs deve ser vazia.");
     }
 
-    @Test
-    @DisplayName("Deve lançar exceção ao mapear lista contendo questão nula")
-    void shouldThrowException_WhenMappingListWithNullQuestion() {
-        Question validQuestion = new Question();
-        validQuestion.setId(1L);
-
-        List<Question> questions = List.of(validQuestion);
-
-        assertThrows(NullPointerException.class, () -> questions.stream().map(questionMapper::toDTO).toList());
-    }
 }

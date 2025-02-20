@@ -17,12 +17,13 @@ public class QuestionSeederService {
     private QuestionRepository questionRepository;
 
     public void seedQuestions() {
+        System.out.println("Chamando seedQuestions()..."); // Apenas para depuração
         List<Question> questions = new ArrayList<>();
 
         for (int i = 1; i <= 1000; i++) {
             Question question = new Question();
             question.setText("Question " + i);
-            question.setAnswer((char) ('A' + (i % 4))); // Randomly set answer: A, B, C, or D
+            question.setAnswer((char) ('A' + (i % 4)));
 
             Map<String, String> answers = new HashMap<>();
             answers.put("A", "Answer A for question " + i);
@@ -36,4 +37,5 @@ public class QuestionSeederService {
 
         questionRepository.saveAll(questions);
     }
+
 }

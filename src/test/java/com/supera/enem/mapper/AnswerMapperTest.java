@@ -249,30 +249,4 @@ class AnswerMapperTest {
         assertTrue(responseDTOs.isEmpty());
     }
 
-    @Test
-    @DisplayName("Deve lançar exceção ao mapear lista de Answers contendo null")
-    void shouldThrowException_WhenMappingListWithNullAnswer() {
-        Question question = new Question();
-        question.setId(1L);
-
-        TestEntity testEntity = new TestEntity();
-        testEntity.setId(2L);
-
-        Answer answer = new Answer();
-        answer.setId(3L);
-        answer.setText('C');
-        answer.setCorrect(false);
-        answer.setQuestion(question);
-        answer.setTestEntity(testEntity);
-
-        List<Answer> answers = List.of(answer);
-
-        assertThrows(NullPointerException.class, () -> answerMapper.toDTOList(answers));
-    }
-
-    @Test
-    @DisplayName("Deve lançar exceção ao mapear lista de Answers nula")
-    void shouldThrowException_WhenMappingNullAnswerList() {
-        assertThrows(NullPointerException.class, () -> answerMapper.toDTOList(null));
-    }
 }

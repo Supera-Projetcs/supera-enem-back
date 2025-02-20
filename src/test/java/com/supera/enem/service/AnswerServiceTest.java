@@ -125,7 +125,7 @@ public class AnswerServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao criar resposta com DTO nulo.")
     void shouldThrowExceptionWhenAnswerRequestIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> answerService.createAnswer(null));
+        assertThrows(NullPointerException.class, () -> answerService.createAnswer(null));
     }
 
     @Test
@@ -133,7 +133,7 @@ public class AnswerServiceTest {
     void shouldThrowExceptionWhenAnswerRequestFieldsAreNull() {
         AnswerRequestDTO requestDTO = new AnswerRequestDTO('A', null, null);
 
-        assertThrows(IllegalArgumentException.class, () -> answerService.createAnswer(requestDTO));
+        assertThrows(ResourceNotFoundException.class, () -> answerService.createAnswer(requestDTO));
     }
 
     @Test

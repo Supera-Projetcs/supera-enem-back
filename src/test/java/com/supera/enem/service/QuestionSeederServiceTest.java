@@ -5,6 +5,7 @@ import com.supera.enem.repository.QuestionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -37,15 +38,13 @@ class QuestionSeederServiceTest {
 
         verify(questionRepository, times(1)).saveAll(anyList());
 
-        List<Question> savedQuestions = new ArrayList<>();
-        verify(questionRepository).saveAll(argThat(questions -> {
-            savedQuestions.addAll((List<Question>) questions);
-            return true;
-        }));
+        ArgumentCaptor<List<Question>> captor = ArgumentCaptor.forClass(List.class);
+        verify(questionRepository).saveAll(captor.capture());
+        List<Question> savedQuestions = captor.getValue(); // Pegando a lista realmente salva
 
         List<Question> questionList = new ArrayList<>(savedQuestions);
 
-        assertEquals(1000, questionList.size(), "Devem ser geradas exatamente 1000 perguntas.");
+        assertEquals(1000, savedQuestions.size(), "Devem ser geradas exatamente 1000 perguntas.");
 
         for (int i = 0; i < questionList.size(); i++) {
             Question question = questionList.get(i);

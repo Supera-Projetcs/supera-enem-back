@@ -42,7 +42,6 @@ public class PerformanceService {
     private StudentRepository studentRepository;
 
     public List<SubjectDifficultyDTO> getSubjectDifficulties(Long studentId) {
-
         if (studentId == null) {
             throw new IllegalArgumentException("Student ID must not be null");
         }
@@ -52,6 +51,10 @@ public class PerformanceService {
         return results.stream().map(result -> {
             String subjectName = (String) result[0];
             double avgPerformance = ((Number) result[1]).doubleValue();
+
+            if (avgPerformance < 0 || avgPerformance > 100) {
+                throw new IllegalArgumentException("Invalid performance value: " + avgPerformance);
+            }
 
             String difficulty;
             if (avgPerformance > 70) {
@@ -65,6 +68,7 @@ public class PerformanceService {
             return new SubjectDifficultyDTO(subjectName, difficulty);
         }).collect(Collectors.toList());
     }
+
 
     public List<PerformaceResponseDTO> createInitialPerformance(Long studentId, List<InitialPerformaceRequestDTO> listDto) {
         if(listDto.size() < subjectRepository.findAll().size()) throw new BusinessException("Não tem perfomace inicial para todos as matérias.");
