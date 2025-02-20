@@ -390,37 +390,38 @@ public class StudentServiceTest {
         updateStudentDTO.setBirthDate(LocalDate.of(2000, 1, 1));
         updateStudentDTO.setPreferredStudyDays(Set.of());
 
-        // Mock behavior for getStudentById method
         when(studentRepository.findById(1L)).thenReturn(java.util.Optional.of(existingStudent));
 
-        // Mock the updateStudentFromDTO method to apply changes to the existing student
-        doNothing().when(studentMapper).updateStudentFromDTO(updateStudentDTO, existingStudent);
+        doAnswer(invocation -> {
+            UpdateStudentDTO dto = invocation.getArgument(0);
+            Student student = invocation.getArgument(1);
 
-        // Log the state of the existing student before update
+            student.setFirstName(dto.getFirstName());
+            student.setLastName(dto.getLastName());
+            student.setDreamCourse(dto.getDreamCourse());
+            student.setPhone(dto.getPhone());
+            student.setBirthDate(dto.getBirthDate());
+            student.setPreferredStudyDays(dto.getPreferredStudyDays());
+
+            return null;
+        }).when(studentMapper).updateStudentFromDTO(any(UpdateStudentDTO.class), any(Student.class));
+
         System.out.println("Existing student before update: " + existingStudent);
 
-        // Use ArgumentCaptor to capture the argument passed to the save method
         ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
 
-        // Mock save method (we don't care about the return value in this case)
         when(studentRepository.save(studentCaptor.capture())).thenReturn(existingStudent);
 
-        // Call the updateStudent method
         Student updatedStudent = studentService.updateStudent(1L, updateStudentDTO);
 
-        // Log the state of the existing student after update
         System.out.println("Existing student after update: " + existingStudent);
 
-        // Verify that save was called
         verify(studentRepository, times(1)).save(any(Student.class));
 
-        // Capture the updated student passed to save
         Student capturedStudent = studentCaptor.getValue();
 
-        // Log the captured student for further debugging
         System.out.println("Captured student: " + capturedStudent);
 
-        // Verify that the captured student has the updated values
         assertEquals("Jane", capturedStudent.getFirstName());
         assertEquals("Doe", capturedStudent.getLastName());
         assertEquals("Medicine", capturedStudent.getDreamCourse());

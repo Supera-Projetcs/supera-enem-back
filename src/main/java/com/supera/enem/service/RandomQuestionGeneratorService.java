@@ -35,6 +35,10 @@ public class RandomQuestionGeneratorService {
             return;
         }
 
+        if (allQuestions.size() < 3) {
+            throw new IllegalArgumentException("Insufficient questions to assign");
+        }
+
         for (Content content : contents) {
 
             int questionsToAssign = Math.min(allQuestions.size(), 5);

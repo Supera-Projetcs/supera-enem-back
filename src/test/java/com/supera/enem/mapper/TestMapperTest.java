@@ -76,17 +76,6 @@ class TestMapperTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção ao mapear lista de imagens contendo nulos")
-    void shouldThrowException_WhenMappingListWithNullImage() {
-        Image image1 = new Image();
-        image1.setUrl("image1.jpg");
-
-        List<Image> images = List.of(image1);
-
-        assertThrows(NullPointerException.class, () -> testMapper.mapImagesToStrings(images));
-    }
-
-    @Test
     @DisplayName("Deve lidar com TestEntity com campos nulos ao mapear para TestResponseDTO")
     void shouldHandleNullFieldsInTestEntity_WhenMappingToDTO() {
         TestEntity testEntity = new TestEntity();

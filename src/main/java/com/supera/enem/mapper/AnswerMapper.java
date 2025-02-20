@@ -5,6 +5,8 @@ import com.supera.enem.controller.DTOS.AnswerResponseDTO;
 import com.supera.enem.domain.Answer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
+import org.mapstruct.NullValueMappingStrategy;
 
 import java.util.List;
 

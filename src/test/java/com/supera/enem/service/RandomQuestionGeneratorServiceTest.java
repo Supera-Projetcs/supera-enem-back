@@ -102,8 +102,9 @@ class RandomQuestionGeneratorServiceTest {
                 new Content(1L, "Content 1", 0.5, 0.5, null, new HashSet<>(), new HashSet<>())
         );
 
-        List<Question> mockQuestions = List.of(
-                new Question(1L, "Question 1", 'A', new ArrayList<>(), null, null, new HashSet<>())
+        List<Question> mockQuestions = List.of( // 👈 Menos de 5 perguntas
+                new Question(1L, "Question 1", 'A', new ArrayList<>(), null, null, new HashSet<>()),
+                new Question(2L, "Question 2", 'B', new ArrayList<>(), null, null, new HashSet<>())
         );
 
         when(contentRepository.findAll()).thenReturn(mockContents);
@@ -113,4 +114,5 @@ class RandomQuestionGeneratorServiceTest {
 
         assertEquals("Insufficient questions to assign", exception.getMessage());
     }
+
 }
