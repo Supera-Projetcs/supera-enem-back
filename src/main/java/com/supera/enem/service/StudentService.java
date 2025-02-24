@@ -137,7 +137,6 @@ public class StudentService {
         Student student = studentMapper.toStudent(studentRecord);
         student.setKeycloakId(keycloakUserId);
 
-
         return studentRepository.save(student);
     }
 
