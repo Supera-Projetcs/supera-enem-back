@@ -313,20 +313,10 @@
 					<mutators>
 						<mutator>ALL</mutator>
 					</mutators>
-					<!-- Use JaCoCo coverage engine -->
-					<coverageEngine>JaCoCo</coverageEngine>
-					<!-- Specify output formats -->
 					<outputFormats>
 						<format>XML</format>
 						<format>HTML</format>
 					</outputFormats>
-					<plugins>
-						<plugin>
-							<groupId>org.pitest</groupId>
-							<artifactId>pitest-junit4-plugin</artifactId>
-							<version>1.0.0</version>
-						</plugin>
-					</plugins>
 				</configuration>
 			</plugin>
 
