@@ -38,7 +38,7 @@ import java.util.Set;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AuthControllerIntegrationTest {
 
     @Autowired

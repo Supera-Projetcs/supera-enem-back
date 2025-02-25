@@ -52,7 +52,6 @@ public class WeeklyReportService {
     private SubjectRepository subjectRepository;
 
 
-
     public WeeklyReportDTO getWeeklyReportById(Long id, Student student) {
       WeeklyReport weeklyReport =  weeklyReportRepository.findByIdAndStudent(id, student).orElseThrow(()-> new ResourceNotFoundException("WeeklyReport not exist"));
       return weeklyReportMapper.toDto(weeklyReport);

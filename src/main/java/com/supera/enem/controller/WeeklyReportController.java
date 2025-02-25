@@ -26,10 +26,8 @@ public class WeeklyReportController {
     @Autowired
     private AuthenticatedService authenticationService;
 
-
     @GetMapping("/{id}")
     public WeeklyReportDTO getWeeklyReportById(@PathVariable Long id, @AuthenticationPrincipal Student student) {
-
         return weeklyReportService.getWeeklyReportById(id, student);
     }
 
@@ -42,7 +40,5 @@ public class WeeklyReportController {
     public WeeklyReportDTO updateWeeklyReport(@RequestBody WeeklyReportRequestDTO weeklyReportDTO, @PathVariable Long id) {
         return weeklyReportService.updateWeeklyReport(weeklyReportDTO, id);
     }
-
-
 
 }
