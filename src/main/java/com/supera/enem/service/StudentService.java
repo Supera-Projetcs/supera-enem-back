@@ -99,9 +99,7 @@ public class StudentService {
     public Student getStudentLogged(String token){
         String keycloakId = keycloakService.getKeycloakIdByToken(token);
         Student student = studentRepository.findByKeycloakId(keycloakId);
-
         return student;
-
     }
 
     private void validatePassword(String password) {

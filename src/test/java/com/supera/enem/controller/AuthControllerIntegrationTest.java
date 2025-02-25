@@ -1,33 +1,36 @@
 package com.supera.enem.controller;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.supera.enem.controller.DTOS.AddressDTO;
 import com.supera.enem.controller.DTOS.Student.StudentDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
+import com.supera.enem.domain.Student;
 import com.supera.enem.domain.enums.Weekday;
 import com.supera.enem.repository.StudentRepository;
 import com.supera.enem.service.KeycloackUserService;
-import jakarta.ws.rs.core.Response;
+import com.supera.enem.service.StudentService;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -44,12 +47,28 @@ public class AuthControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @MockBean
     private KeycloackUserService keycloakService;
 
-    @Autowired
+    @MockBean
     private StudentRepository studentRepository;
 
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
+    @Autowired
+    private StudentService studentService;
+
+    private Student student;
+
+    @BeforeEach
+    public void setUp() {
+        student = new Student();
+        student.setId(1L);
+        student.setEmail("test@example.com");
+        student.setUsername("testuser");
+        student.setKeycloakId("keycloakUserId");
+    }
 
     @Test
     public void testRegisterStudent() throws Exception {
@@ -92,4 +111,27 @@ public class AuthControllerIntegrationTest {
 
         assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
     }
+
+    @Test
+    public void testGetUserLogged_Success() throws Exception {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getSubject()).thenReturn("keycloakUserId");
+        when(jwtDecoder.decode("valid-token")).thenReturn(jwt);
+
+        when(studentRepository.findByKeycloakId("keycloakUserId")).thenReturn(student);
+
+        mockMvc.perform(get("/api/auth/user-logged")
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetUserLogged_InvalidToken() throws Exception {
+        mockMvc.perform(get("/user-logged"))
+                .andExpect(status().isUnauthorized());
+
+        verify(keycloakService, never()).getKeycloakIdByToken(anyString());
+        verify(studentRepository, never()).findByKeycloakId(anyString());
+    }
+
 }
