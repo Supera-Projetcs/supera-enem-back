@@ -22,54 +22,54 @@ public class QuestionController {
 
     @Autowired
     private QuestionService questionService;
-    @Autowired
-    private QuestionRepository questionRepository;
-    @Autowired
-    private MinioService minioService;
-    @Autowired
-    private ImageRepository imageRepository;
+//    @Autowired
+//    private QuestionRepository questionRepository;
+//    @Autowired
+//    private MinioService minioService;
+//    @Autowired
+//    private ImageRepository imageRepository;
 
-    @PatchMapping
-    public Question saveQuestion(@RequestBody Question question) {
-        return questionService.save(question);
-    }
+//    @PatchMapping
+//    public Question saveQuestion(@RequestBody Question question) {
+//        return questionService.save(question);
+//    }
 
-    @GetMapping
-    public List<QuestionResponseDTO> getAllQuestions() {
-        return questionService.getAllQuestions();
-    }
+//    @GetMapping
+//    public List<QuestionResponseDTO> getAllQuestions() {
+//        return questionService.getAllQuestions();
+//    }
 
     @GetMapping("/{id}")
     public QuestionResponseDTO getQuestionById(@PathVariable Long id) {
         return questionService.getQuestionById(id);
     }
 
-    @PostMapping("/{questionId}/upload-image")
-    public ResponseEntity<?> uploadImage(@PathVariable Long questionId,
-                                         @RequestParam("file") MultipartFile file) {
-        try {
-            Optional<Question> questionOptional = questionRepository.findById(questionId);
-            if (questionOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Question question = questionOptional.get();
-
-            String objectName = "images/" + file.getOriginalFilename();
-            String fileUrl = minioService.uploadFile(objectName, file.getInputStream(), file.getContentType());
-
-            // Cria o objeto Image e associa à questão
-            Image image = new Image();
-            image.setUrl(fileUrl);
-            image.setDescription("Uploaded image");
-            image.setQuestion(question);
-
-            // Salva a imagem
-            imageRepository.save(image);
-
-            return ResponseEntity.ok(image);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error uploading file: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/{questionId}/upload-image")
+//    public ResponseEntity<?> uploadImage(@PathVariable Long questionId,
+//                                         @RequestParam("file") MultipartFile file) {
+//        try {
+//            Optional<Question> questionOptional = questionRepository.findById(questionId);
+//            if (questionOptional.isEmpty()) {
+//                return ResponseEntity.notFound().build();
+//            }
+//
+//            Question question = questionOptional.get();
+//
+//            String objectName = "images/" + file.getOriginalFilename();
+//            String fileUrl = minioService.uploadFile(objectName, file.getInputStream(), file.getContentType());
+//
+//            // Cria o objeto Image e associa à questão
+//            Image image = new Image();
+//            image.setUrl(fileUrl);
+//            image.setDescription("Uploaded image");
+//            image.setQuestion(question);
+//
+//            // Salva a imagem
+//            imageRepository.save(image);
+//
+//            return ResponseEntity.ok(image);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body("Error uploading file: " + e.getMessage());
+//        }
+//    }
 }
