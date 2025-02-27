@@ -55,7 +55,7 @@ public class KeyClockUserServiceTest {
 
     @Test
     void testCreateUser_Success() {
-        UseKeycloakRegistrationDTO dto = new UseKeycloakRegistrationDTO("john_doe", "john@example.com", "John", "Doe", "password123");
+        UseKeycloakRegistrationDTO dto = new UseKeycloakRegistrationDTO("john_doe", "john@example.com", "John Doe", "password123");
         Response response = mock(Response.class);
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setId("12345");

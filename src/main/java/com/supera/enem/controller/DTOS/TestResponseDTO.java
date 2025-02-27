@@ -1,6 +1,6 @@
 package com.supera.enem.controller.DTOS;
 
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentResponseDTO;
 import com.supera.enem.domain.enums.TestType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +17,6 @@ public class TestResponseDTO {
     private TestType type;
     private Date date;
 
-    private StudentDTO student;
+    private StudentResponseDTO student;
     private List<QuestionResponseDTO> questions;
 }

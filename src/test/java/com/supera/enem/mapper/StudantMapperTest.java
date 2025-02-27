@@ -1,6 +1,6 @@
 package com.supera.enem.mapper;
 
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
 import com.supera.enem.controller.DTOS.Student.UpdateStudentDTO;
 import com.supera.enem.domain.Student;
 
@@ -17,10 +17,9 @@ public class StudantMapperTest {
 
     @Test
     public void testToStudent() {
-        StudentDTO dto = new StudentDTO();
+        StudentRequestDTO dto = new StudentRequestDTO();
         dto.setUsername("test_user");
-        dto.setFirstName("John");
-        dto.setLastName("Doe");
+        dto.setName("John Doe");
         dto.setDreamCourse("Computer Science");
         dto.setPhone("123456789");
         dto.setEmail("john.doe@example.com");
@@ -30,8 +29,7 @@ public class StudantMapperTest {
 
         assertNotNull(student);
         assertEquals(dto.getUsername(), student.getUsername());
-        assertEquals(dto.getFirstName(), student.getFirstName());
-        assertEquals(dto.getLastName(), student.getLastName());
+        assertEquals(dto.getName(), student.getName());
         assertEquals(dto.getDreamCourse(), student.getDreamCourse());
         assertEquals(dto.getPhone(), student.getPhone());
         assertEquals(dto.getEmail(), student.getEmail());
@@ -43,17 +41,16 @@ public class StudantMapperTest {
         Student student = new Student();
         student.setId(1L);
         student.setUsername("old_user");
-        student.setFirstName("OldFirstName");
-        student.setLastName("OldLastName");
+        student.setName("OldFirstName");
+
 
         UpdateStudentDTO updateDTO = new UpdateStudentDTO();
-        updateDTO.setFirstName("NewFirstName");
-        updateDTO.setLastName("NewLastName");
+        updateDTO.setName("NewFirstName");
+
 
         studentMapper.updateStudentFromDTO(updateDTO, student);
 
-        assertEquals("NewFirstName", student.getFirstName());
-        assertEquals("NewLastName", student.getLastName());
+        assertEquals("NewFirstName", student.getName());
         assertEquals("old_user", student.getUsername()); // Não deve ser alterado
         assertNotNull(student.getId()); // Deve continuar com o ID original
     }

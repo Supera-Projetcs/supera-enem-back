@@ -22,21 +22,21 @@ services:
     ports:
       - "5432:5432"
 
-#  app:
-#    build:
-#      context: .
-#      dockerfile: ./compose/spring/Dockerfile
-#    image: supera_enem-app:latest
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/enem
-#      - SPRING_DATASOURCE_USERNAME=NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA
-#      - SPRING_DATASOURCE_PASSWORD=3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - keycloak
-#      - postgres
-#      - minio
+  app:
+    build:
+      context: .
+      dockerfile: ./compose/spring/Dockerfile
+    image: supera_enem-app:latest
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/enem
+      - SPRING_DATASOURCE_USERNAME=NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA
+      - SPRING_DATASOURCE_PASSWORD=3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak
+      - postgres
+      - minio
 
   grafana:
     image: grafana/grafana
