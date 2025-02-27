@@ -1,6 +1,6 @@
 package com.supera.enem.mapper;
 
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
 import com.supera.enem.controller.DTOS.Student.UpdateStudentDTO;
 import com.supera.enem.domain.Student;
 
@@ -17,7 +17,7 @@ public class StudantMapperTest {
 
     @Test
     public void testToStudent() {
-        StudentDTO dto = new StudentDTO();
+        StudentRequestDTO dto = new StudentRequestDTO();
         dto.setUsername("test_user");
         dto.setFirstName("John");
         dto.setLastName("Doe");

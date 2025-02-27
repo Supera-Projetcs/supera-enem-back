@@ -117,7 +117,7 @@ public class StudentService {
         }
     }
 
-    public Student createStudent(StudentDTO studentRecord) {
+    public Student createStudent(StudentRequestDTO studentRecord) {
 
         if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new ResourceAlreadyExists("Estudante com este e-mail já existe.");
 
@@ -128,6 +128,7 @@ public class StudentService {
         validatePassword(studentRecord.getPassword());
 
         UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
+        userKeycloakRecord.setFirstName(studentRecord.getName());
         String keycloakUserId = keycloakService.createUser(userKeycloakRecord);
 
         if (keycloakUserId == null) throw new BusinessException("Erro ao criar usuário no Keycloak.");

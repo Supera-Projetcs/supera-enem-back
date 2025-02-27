@@ -1,7 +1,6 @@
 package com.supera.enem.service;
 
-import com.supera.enem.controller.DTOS.AddressDTO;
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
 import com.supera.enem.controller.DTOS.Student.UpdateStudentDTO;
 import com.supera.enem.controller.DTOS.StudentSubject.StudentSubjectRequestDTO;
 import com.supera.enem.controller.DTOS.StudentSubject.StudentSubjectResponseDTO;
@@ -63,7 +62,7 @@ public class StudentServiceTest {
     private StudentMapper studentMapper;
 
     private UseKeycloakRegistrationDTO keycloakDTO;
-    private StudentDTO studentDTO;
+    private StudentRequestDTO studentDTO;
     private Student student;
     private Student newStudent;
 
@@ -82,7 +81,7 @@ public class StudentServiceTest {
         student.setEmail("old@example.com");
         student.setKeycloakId("keycloak-id-123");
 
-        studentDTO = new StudentDTO();
+        studentDTO = new StudentRequestDTO();
         studentDTO.setEmail("test@example.com");
         studentDTO.setUsername("testUser");
         studentDTO.setPassword("StrongP@ss1");

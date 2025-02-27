@@ -1,6 +1,6 @@
 package com.supera.enem.users;
 
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
 import com.supera.enem.controller.DTOS.AddressDTO;
 import com.supera.enem.exception.BusinessException;
 import com.supera.enem.exception.ResourceAlreadyExists;
@@ -41,7 +41,7 @@ public class RegisterUserAuthTest {
     @InjectMocks
     private StudentService studentService;
 
-    private StudentDTO validStudentDTO;
+    private StudentRequestDTO validStudentDTO;
 
 
     @BeforeEach
@@ -49,7 +49,7 @@ public class RegisterUserAuthTest {
         MockitoAnnotations.openMocks(this);
 
         // Setup de um DTO válido
-        validStudentDTO = new StudentDTO();
+        validStudentDTO = new StudentRequestDTO();
         validStudentDTO.setUsername("user123");
         validStudentDTO.setFirstName("João");
         validStudentDTO.setLastName("Silva");

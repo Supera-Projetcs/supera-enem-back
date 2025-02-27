@@ -4,11 +4,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.supera.enem.controller.DTOS.AddressDTO;
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.enums.Weekday;
@@ -25,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -76,7 +74,7 @@ public class AuthControllerIntegrationTest {
         when(keycloakService.createUser(any(UseKeycloakRegistrationDTO.class)))
                 .thenReturn("mocked-user-id");
 
-        StudentDTO studentDTO = new StudentDTO();
+        StudentRequestDTO studentDTO = new StudentRequestDTO();
         studentDTO.setUsername("latransa");
         studentDTO.setFirstName("string");
         studentDTO.setLastName("string");

@@ -25,11 +25,9 @@ public class Student {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false, name = "first_name")
-    private String firstName;
+    @Column(nullable = false, name = "name")
+    private String name;
 
-    @Column(nullable = false, name = "last_name")
-    private String lastName;
 
     @Column(nullable = false, name = "dream_course")
     private String dreamCourse;
@@ -37,7 +35,7 @@ public class Student {
     @Column(nullable = false)
     private String phone;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false, name = "birth_date")
