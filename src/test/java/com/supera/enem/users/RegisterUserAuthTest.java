@@ -1,7 +1,8 @@
 package com.supera.enem.users;
 
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
 import com.supera.enem.controller.DTOS.AddressDTO;
+import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 import com.supera.enem.exception.BusinessException;
 import com.supera.enem.exception.ResourceAlreadyExists;
 import com.supera.enem.mapper.StudentMapper;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 import java.time.LocalDate;
@@ -41,31 +43,34 @@ public class RegisterUserAuthTest {
     @InjectMocks
     private StudentService studentService;
 
-    private StudentDTO validStudentDTO;
+    private StudentRequestDTO validStudentDTO;
+
 
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        UseKeycloakRegistrationDTO useKeycloakRegistrationDTO = new UseKeycloakRegistrationDTO();
+
         // Setup de um DTO válido
-        validStudentDTO = new StudentDTO();
+        validStudentDTO = new StudentRequestDTO();
         validStudentDTO.setUsername("user123");
-        validStudentDTO.setFirstName("João");
-        validStudentDTO.setLastName("Silva");
+        validStudentDTO.setName("João Kebler");
         validStudentDTO.setDreamCourse("Medicina");
         validStudentDTO.setPhone("123456789");
         validStudentDTO.setEmail("joao.silva@gmail.com");
         validStudentDTO.setBirthDate(LocalDate.of(2000, 1, 1));
         validStudentDTO.setPassword("Senha123@");
-        validStudentDTO.setPreferredStudyDays(Set.of(Weekday.MONDAY, Weekday.WEDNESDAY));
         AddressDTO addressDTO = new AddressDTO();
         addressDTO.setStreet("Rua 1");
+        addressDTO.setNeighborhood("Bairro 1");
         addressDTO.setCity("Cidade");
         addressDTO.setState("Estado");
         addressDTO.setZipCode("12345-678");
         addressDTO.setHouseNumber("10");
         validStudentDTO.setAddress(addressDTO);
+
     }
 
     @Test
@@ -75,8 +80,8 @@ public class RegisterUserAuthTest {
         when(keycloakImplementation.createUser(any())).thenReturn("keycloakId123");
 
         Student mockStudent = new Student();
-        mockStudent.setFirstName(validStudentDTO.getFirstName());
-        mockStudent.setLastName(validStudentDTO.getLastName());
+        mockStudent.setName(validStudentDTO.getName());
+
 
         when(studentMapper.toStudent(validStudentDTO)).thenReturn(mockStudent);
 
@@ -90,7 +95,7 @@ public class RegisterUserAuthTest {
 
         assertNotNull(createdStudent);
         assertEquals("keycloakId123", createdStudent.getKeycloakId());
-        assertEquals(validStudentDTO.getFirstName(), createdStudent.getFirstName());
+        assertEquals(validStudentDTO.getName(), createdStudent.getName());
         verify(studentRepository, times(1)).save(any());
     }
 

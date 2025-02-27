@@ -117,7 +117,7 @@ public class StudentService {
         }
     }
 
-    public Student createStudent(StudentDTO studentRecord) {
+    public Student createStudent(StudentRequestDTO studentRecord) {
 
         if (studentRepository.findByEmail(studentRecord.getEmail()).isPresent()) throw new ResourceAlreadyExists("Estudante com este e-mail já existe.");
 

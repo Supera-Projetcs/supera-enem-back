@@ -1,12 +1,10 @@
 package com.supera.enem.controller;
 
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
+import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
 import com.supera.enem.domain.Student;
-import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +17,7 @@ public class AuthController {
     private StudentService studentService;
 
     @PostMapping("/register")
-    public ResponseEntity<Student> createUser(@Valid @RequestBody StudentDTO student) {
+    public ResponseEntity<Student> createUser(@Valid @RequestBody StudentRequestDTO student) {
         return ResponseEntity.ok(studentService.createStudent(student));
     }
 

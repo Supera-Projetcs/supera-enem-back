@@ -1,19 +1,12 @@
 package com.supera.enem.controller;
 
 import com.supera.enem.TestDataUtil;
-import com.supera.enem.controller.DTOS.ContentDTO;
-import com.supera.enem.controller.DTOS.Performace.PerformaceResponseDTO;
 import com.supera.enem.controller.DTOS.QuestionResponseDTO;
-import com.supera.enem.controller.DTOS.Student.StudentDTO;
-import com.supera.enem.controller.DTOS.SubjectDifficultyDTO;
 import com.supera.enem.controller.DTOS.TestResponseDTO;
 import com.supera.enem.domain.Student;
-import com.supera.enem.domain.Subject;
 import com.supera.enem.domain.enums.TestType;
-import com.supera.enem.exception.BusinessException;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.StudentMapper;
-import com.supera.enem.service.PerformanceService;
 import com.supera.enem.service.TestService;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @SpringBootTest

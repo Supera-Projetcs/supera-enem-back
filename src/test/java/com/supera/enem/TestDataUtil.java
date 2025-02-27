@@ -46,8 +46,7 @@ public class TestDataUtil {
         Student student = new Student();
         student.setKeycloakId("keycloakUserId");
         student.setUsername("testuser");
-        student.setFirstName("Test");
-        student.setLastName("User");
+        student.setName("Test User");
         student.setDreamCourse("Computer Science");
         student.setPhone("123456789");
         student.setEmail("test@example.com");
