@@ -11,9 +11,32 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Configurar variáveis de ambiente
+        run: |
+          echo "POSTGRES_DB=${{ env.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USER=${{ env.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}" >> .env
+          echo "KEYCLOAK_ADMIN=${{ env.KEYCLOAK_ADMIN }}" >> .env
+          echo "KEYCLOAK_ADMIN_PASSWORD=${{ env.KEYCLOAK_ADMIN_PASSWORD }}" >> .env
 
       - name: Set up Java
         uses: actions/setup-java@v3
