@@ -1,6 +1,7 @@
 package com.supera.enem.mapper;
 
 import com.supera.enem.controller.DTOS.Student.StudentRequestDTO;
+import com.supera.enem.controller.DTOS.Student.StudentResponseDTO;
 import com.supera.enem.controller.DTOS.Student.UpdateStudentDTO;
 import com.supera.enem.domain.Student;
 
@@ -19,5 +20,5 @@ public interface StudentMapper {
     @Mapping(target = "id", ignore = true)  // Evita modificar o ID
     void updateStudentFromDTO(UpdateStudentDTO dto, @MappingTarget Student student);
 
-    StudentRequestDTO toStudentDTO(Student student);
+    StudentResponseDTO toStudentDTO(Student student);
 }

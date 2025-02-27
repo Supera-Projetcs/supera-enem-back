@@ -76,8 +76,8 @@ public class AuthControllerIntegrationTest {
 
         StudentRequestDTO studentDTO = new StudentRequestDTO();
         studentDTO.setUsername("latransa");
-        studentDTO.setFirstName("string");
-        studentDTO.setLastName("string");
+        studentDTO.setName("My Name");
+
         studentDTO.setDreamCourse("string");
         studentDTO.setPhone("string");
         studentDTO.setEmail("emailtop@gmail.com");
@@ -92,7 +92,7 @@ public class AuthControllerIntegrationTest {
 
         studentDTO.setAddress(addressDTO);
         studentDTO.setPassword("Tiolu666$");
-        studentDTO.setPreferredStudyDays(Set.of(Weekday.MONDAY));
+
 
         String studentJson = objectMapper.writeValueAsString(studentDTO);
 

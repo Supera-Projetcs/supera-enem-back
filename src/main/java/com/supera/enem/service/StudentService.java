@@ -128,7 +128,6 @@ public class StudentService {
         validatePassword(studentRecord.getPassword());
 
         UseKeycloakRegistrationDTO userKeycloakRecord = userKeycloakMapper.toKeycloakDTO(studentRecord);
-        userKeycloakRecord.setFirstName(studentRecord.getName());
         String keycloakUserId = keycloakService.createUser(userKeycloakRecord);
 
         if (keycloakUserId == null) throw new BusinessException("Erro ao criar usuário no Keycloak.");

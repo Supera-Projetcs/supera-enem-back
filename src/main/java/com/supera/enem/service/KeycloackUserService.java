@@ -44,8 +44,8 @@ public class KeycloackUserService {
         user.setEnabled(true);
         user.setUsername(userRegistrationRecord.getUsername());
         user.setEmail(userRegistrationRecord.getEmail());
-        user.setFirstName(userRegistrationRecord.getFirstName());
-        user.setLastName(userRegistrationRecord.getLastName());
+        user.setFirstName(userRegistrationRecord.getName());
+        user.setLastName("");
         user.setEmailVerified(false);
 
         CredentialRepresentation credentialRepresentation = new CredentialRepresentation();

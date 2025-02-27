@@ -115,8 +115,7 @@ public class StudentServiceTest {
         existingStudent = new Student();
         existingStudent.setId(1L);
         existingStudent.setKeycloakId(keycloakId);
-        existingStudent.setFirstName("João");
-        existingStudent.setLastName("Silva");
+        existingStudent.setName("João Silva");
         existingStudent.setDreamCourse("Engenharia");
         existingStudent.setPhone("11999999999");
         existingStudent.setBirthDate(LocalDate.of(2000, 5, 15));
@@ -382,8 +381,7 @@ public class StudentServiceTest {
     void testUpdateStudent() {
         // Create a DTO with updated details
         UpdateStudentDTO updateStudentDTO = new UpdateStudentDTO();
-        updateStudentDTO.setFirstName("Jane");  // The updated first name
-        updateStudentDTO.setLastName("Doe");
+        updateStudentDTO.setName("Jane Doe");
         updateStudentDTO.setDreamCourse("Medicine");
         updateStudentDTO.setPhone("987654321");
         updateStudentDTO.setBirthDate(LocalDate.of(2000, 1, 1));
@@ -395,8 +393,7 @@ public class StudentServiceTest {
             UpdateStudentDTO dto = invocation.getArgument(0);
             Student student = invocation.getArgument(1);
 
-            student.setFirstName(dto.getFirstName());
-            student.setLastName(dto.getLastName());
+            student.setName(dto.getName());
             student.setDreamCourse(dto.getDreamCourse());
             student.setPhone(dto.getPhone());
             student.setBirthDate(dto.getBirthDate());
@@ -421,8 +418,7 @@ public class StudentServiceTest {
 
         System.out.println("Captured student: " + capturedStudent);
 
-        assertEquals("Jane", capturedStudent.getFirstName());
-        assertEquals("Doe", capturedStudent.getLastName());
+        assertEquals("Jane Doe", capturedStudent.getName());
         assertEquals("Medicine", capturedStudent.getDreamCourse());
         assertEquals("987654321", capturedStudent.getPhone());
     }
@@ -431,7 +427,7 @@ public class StudentServiceTest {
     void shouldThrowExceptionWhenStudentNotFound() {
         // Arrange
         UpdateStudentDTO updateStudentDTO = new UpdateStudentDTO();
-        updateStudentDTO.setFirstName("Novo Nome");
+        updateStudentDTO.setName("Novo Nome");
 
         when(studentRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -462,8 +458,7 @@ public class StudentServiceTest {
         // Verifica se o retorno do método é o esperado
         assertNotNull(student);
         assertEquals(existingStudent.getId(), student.getId());
-        assertEquals(existingStudent.getFirstName(), student.getFirstName());
-        assertEquals(existingStudent.getLastName(), student.getLastName());
+        assertEquals(existingStudent.getName(), student.getName());
         assertEquals(existingStudent.getDreamCourse(), student.getDreamCourse());
     }
 

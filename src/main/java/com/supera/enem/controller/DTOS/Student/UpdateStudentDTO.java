@@ -13,8 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateStudentDTO {
-    private String firstName;
-    private String lastName;
+    private String name;
     private String dreamCourse;
     private String phone;
     private LocalDate birthDate;

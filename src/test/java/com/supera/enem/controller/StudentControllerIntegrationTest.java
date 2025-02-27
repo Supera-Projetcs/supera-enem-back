@@ -79,14 +79,15 @@ public class StudentControllerIntegrationTest {
     public void testPartialUpdateStudent_Success() throws Exception {
         // Cria um DTO de atualização
         UpdateStudentDTO updateStudentDTO = new UpdateStudentDTO();
-        updateStudentDTO.setFirstName("John");
-        updateStudentDTO.setLastName("Doe");
+        updateStudentDTO.setName("John Doe");
+
         updateStudentDTO.setDreamCourse("Computer Science");
         updateStudentDTO.setPhone("1234567890");
         updateStudentDTO.setBirthDate(LocalDate.of(2000, 1, 1));
 
         AddressDTO addressDTO = new AddressDTO();
         addressDTO.setStreet("123 Main St");
+        addressDTO.setNeighborhood("Bairro");
         addressDTO.setCity("Springfield");
         addressDTO.setState("IL");
         addressDTO.setZipCode("62701");
@@ -103,14 +104,14 @@ public class StudentControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer valid-token")
                         .content("{\n" +
-                                "  \"firstName\": \"John\",\n" +
-                                "  \"lastName\": \"Doe\",\n" +
+                                "  \"name\": \"John Doe\",\n" +
                                 "  \"dreamCourse\": \"Computer Science\",\n" +
                                 "  \"phone\": \"1234567890\",\n" +
                                 "  \"birthDate\": \"2000-01-01\",\n" +
                                 "  \"address\": {\n" +
                                 "    \"street\": \"123 Main St\",\n" +
                                 "    \"city\": \"Springfield\",\n" +
+                                "    \"neighborhood\": \"Bairro\",\n" +
                                 "    \"state\": \"IL\",\n" +
                                 "    \"zipCode\": \"62701\"\n" +
                                 "  },\n" +
