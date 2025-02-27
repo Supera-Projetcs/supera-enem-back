@@ -4,7 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/testEntity/**/target/
 
-src/main/resources/application.properties
+.env
+.envs/*
+
+#src/main/resources/application.properties
 
 upload/images/*
 
