@@ -94,7 +94,6 @@ public class PerformanceService {
             newPerformance.setCreatedAt(LocalDateTime.now()); // Define o horário atual
             newPerformance.setPerformanceRate(performanceRate); // Define o desempenho encontrado
 
-
             performances.add(newPerformance);
         });
 
@@ -102,4 +101,6 @@ public class PerformanceService {
 
         return performanceMapper.toDTO_LIST(performances);
     }
+
+
 }

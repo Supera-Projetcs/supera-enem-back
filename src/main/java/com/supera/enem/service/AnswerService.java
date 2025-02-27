@@ -52,7 +52,6 @@ public class AnswerService {
             throw new ResourceAlreadyExists("An answer already exists for this question in the test");
         }
 
-
         if (!test.getStudent().getKeycloakId().equals(keycloakId)) {
             throw new ResourceNotFoundException("The authenticated student is not related to this test");
         }
@@ -67,7 +66,6 @@ public class AnswerService {
         updatePerformance(answer);
         return answerMapper.toDTO(answer);
     }
-
 
     public void updatePerformance(Answer answer){
         if (answer.getTestEntity() == null || answer.getQuestion() == null) {
