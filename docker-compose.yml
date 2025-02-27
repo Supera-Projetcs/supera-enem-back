@@ -18,25 +18,23 @@ services:
       - supera_enem_postgres_data:/var/lib/postgresql/data
       - supera_enem_postgres_backup:/backups
     env_file:
-      - ./.envs/.postgres
+      - .env
     ports:
       - "5432:5432"
 
-#  app:
-#    build:
-#      context: .
-#      dockerfile: ./compose/spring/Dockerfile
-#    image: supera_enem-app:latest
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/enem
-#      - SPRING_DATASOURCE_USERNAME=NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA
-#      - SPRING_DATASOURCE_PASSWORD=3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - keycloak
-#      - postgres
-#      - minio
+  app:
+    build:
+      context: .
+      dockerfile: ./compose/spring/Dockerfile
+    image: supera_enem-app:latest
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak
+      - postgres
+      - minio
 
   grafana:
     image: grafana/grafana
@@ -60,7 +58,7 @@ services:
     env_file:
       - ./.envs/.postgres
     environment:
-      DATA_SOURCE_NAME: "postgresql://NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA:3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM@postgres:5432/enem?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
     links:
       - postgres
       - prometheus
@@ -68,13 +66,15 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:22.0.5
     container_name: keycloak
+    env_file:
+      - .env
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://postgres:5432/enem
-      - KC_DB_USERNAME=NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA
-      - KC_DB_PASSWORD=3b7VMmu5pMwybV1ncbvI1SkT7Bur0Q7zhjDvoh7vRyZ5VgjK88c9ESuqmGZI7ZRM
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      - KC_DB_USERNAME=${POSTGRES_USER}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
     command: start-dev
     ports:
       - "8081:8080"
