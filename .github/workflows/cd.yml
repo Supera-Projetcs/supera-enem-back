@@ -33,7 +33,7 @@ jobs:
         run: mvn install -DskipTests
 
       - name: Run tests
-        run: mvn test -Dtest='!com.supera.enem.controller.*,!com.supera.enem.SuperaEnemApplicationTests.contextLoads'
+        run: mvn test -Dtest=com.supera.enem.service.**
 
       - name: Build project
         run: mvn clean install -DskipTests
