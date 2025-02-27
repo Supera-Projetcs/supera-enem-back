@@ -4,11 +4,6 @@ import com.supera.enem.TestDataUtil;
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 import com.supera.enem.domain.*;
-import com.supera.enem.domain.enums.Weekday;
-import com.supera.enem.exception.ResourceNotFoundException;
-import com.supera.enem.repository.ContentRepository;
-import com.supera.enem.repository.StudentRepository;
-import com.supera.enem.repository.SubjectRepository;
 import com.supera.enem.repository.WeeklyReportRepository;
 import com.supera.enem.service.AuthenticatedService;
 import com.supera.enem.service.WeeklyReportService;
@@ -30,8 +25,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,7 +68,7 @@ public class WeeklyReportControllerIntegrationTest {
     @Autowired
     private WeeklyReportRepository weeklyReportRepository;
 
-    @Transactional
+//    @Transactional
     @BeforeEach
     public void setUp() {
         student = testDataUtil.createAndSaveStudent();

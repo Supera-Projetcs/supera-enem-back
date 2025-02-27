@@ -256,7 +256,7 @@
 								<exclude>com/supera/enem/seed/**</exclude>
 								<exclude>com/supera/enem/exception/**</exclude>
 								<exclude>com/supera/storage/**</exclude>
-								<exclude>com/supera/mapper/**</exclude>
+								<exclude>com/supera/enem/mapper/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>
@@ -271,7 +271,7 @@
 								<exclude>com/supera/enem/seed/**</exclude>
 								<exclude>com/supera/enem/exception/**</exclude>
 								<exclude>com/supera/storage/**</exclude>
-								<exclude>com/supera/mapper/**</exclude>
+								<exclude>com/supera/enem/mapper/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>
@@ -286,7 +286,7 @@
 								<exclude>com/supera/enem/seed/**</exclude>
 								<exclude>com/supera/enem/exception/**</exclude>
 								<exclude>com/supera/storage/**</exclude>
-								<exclude>com/supera/mapper/**</exclude>
+								<exclude>com/supera/enem/mapper/**</exclude>
 							</excludes>
 							<rules>
 								<rule>
