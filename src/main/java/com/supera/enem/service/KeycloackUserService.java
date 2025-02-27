@@ -3,6 +3,7 @@ import com.supera.enem.controller.DTOS.Student.UpdatePasswordDTO;
 import com.supera.enem.controller.DTOS.UseKeycloakRegistrationDTO;
 
 import com.supera.enem.exception.ResourceAlreadyExists;
+import jakarta.validation.constraints.Email;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.ws.rs.core.Response;
@@ -20,6 +21,7 @@ import java.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -29,6 +31,8 @@ public class KeycloackUserService {
     @Value("${keycloak.realm-server}")
     private String realm;
     private final Keycloak keycloak;
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     public KeycloackUserService(Keycloak keycloak) {
         this.keycloak = keycloak;
@@ -72,7 +76,7 @@ public class KeycloackUserService {
     }
 
 
-    public void updateEmail(String userId, String newEmail) {
+    public void updateEmail(String userId, @Email String newEmail) {
         UsersResource usersResource = getUsersResource();
 
         UserResource userResource = usersResource.get(userId);
@@ -82,15 +86,14 @@ public class KeycloackUserService {
         }
         UserRepresentation userRepresentation = userResource.toRepresentation();
 
-
-        if (newEmail != null && !newEmail.isEmpty()) {
-            userRepresentation.setEmail(newEmail);
-            userRepresentation.setEmailVerified(false);
-            userResource.update(userRepresentation);
-
-        } else {
+        if (newEmail == null || newEmail.isEmpty() || !EMAIL_PATTERN.matcher(newEmail).matches()) {
             throw new IllegalArgumentException("O e-mail fornecido é inválido.");
         }
+
+        userRepresentation.setEmail(newEmail);
+        userRepresentation.setEmailVerified(false);
+        userResource.update(userRepresentation);
+
     }
 
     public void updateUsername(String userId, String username) {
@@ -133,8 +136,6 @@ public class KeycloackUserService {
     }
 
     private UsersResource getUsersResource() {
-        System.out.println("prostituta");
-        System.out.println("Realm: " + realm);
         RealmResource realmResource = keycloak.realm(realm);
         return realmResource.users();
     }

@@ -12,5 +12,4 @@ public interface UserKeycloakMapper {
 
     UseKeycloakRegistrationDTO toKeycloakDTO(StudentDTO studentDTO);
 
-
 }

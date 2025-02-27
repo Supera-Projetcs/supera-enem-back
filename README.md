@@ -25,4 +25,11 @@ docker exec -it supera_enem_postgres psql -U NSmoJtFZRGitRofNFrUxNyaqGbRRbMdA en
 
 mvn jacoco:report
 
+## Comando PITest para mutation testing
+mvn clean test pitest:mutationCoverage
+mvn pitest:mutationCoverage
+
+mvn test -Dtest=
+
+
 

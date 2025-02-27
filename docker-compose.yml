@@ -4,6 +4,9 @@ volumes:
   keycloak_data: {}
   minio_data: {}
   minio_config: {}
+  grafana_data: {}
+  prometheus_data: {}
+
 services:
   postgres:
     build:
@@ -39,6 +42,8 @@ services:
     image: grafana/grafana
     ports:
       - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
 
   prometheus:
     image: prom/prometheus
@@ -46,6 +51,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter

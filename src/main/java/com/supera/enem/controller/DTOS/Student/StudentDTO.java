@@ -3,6 +3,7 @@ package com.supera.enem.controller.DTOS.Student;
 import com.supera.enem.controller.DTOS.AddressDTO;
 import com.supera.enem.domain.enums.Weekday;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;

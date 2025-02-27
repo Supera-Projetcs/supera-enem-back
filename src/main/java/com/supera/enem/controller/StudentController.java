@@ -24,11 +24,11 @@ public class StudentController {
     @Autowired
     private KeycloackUserService keycloackUserService;
 
-    @GetMapping("/")
-    public ResponseEntity<List<Student>> getAllStudents() {
-        List<Student> students = studentService.getAllStudents();
-        return ResponseEntity.ok(students);
-    }
+//    @GetMapping("/")
+//    public ResponseEntity<List<Student>> getAllStudents() {
+//        List<Student> students = studentService.getAllStudents();
+//        return ResponseEntity.ok(students);
+//    }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Student> partialUpdateStudent(

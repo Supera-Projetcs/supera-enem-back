@@ -2,6 +2,8 @@ package com.supera.enem.users;
 
 import com.supera.enem.controller.DTOS.Student.StudentDTO;
 import com.supera.enem.controller.DTOS.AddressDTO;
+import com.supera.enem.exception.BusinessException;
+import com.supera.enem.exception.ResourceAlreadyExists;
 import com.supera.enem.mapper.StudentMapper;
 import com.supera.enem.mapper.UserKeycloakMapper;
 import com.supera.enem.service.StudentService;
@@ -68,11 +70,21 @@ public class RegisterUserAuthTest {
 
     @Test
     void shouldRegisterStudentSuccessfully() {
-
         when(studentRepository.findByEmail(validStudentDTO.getEmail())).thenReturn(Optional.empty());
         when(studentRepository.findByUsername(validStudentDTO.getUsername())).thenReturn(Optional.empty());
         when(keycloakImplementation.createUser(any())).thenReturn("keycloakId123");
-        when(studentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Student mockStudent = new Student();
+        mockStudent.setFirstName(validStudentDTO.getFirstName());
+        mockStudent.setLastName(validStudentDTO.getLastName());
+
+        when(studentMapper.toStudent(validStudentDTO)).thenReturn(mockStudent);
+
+        when(studentRepository.save(any())).thenAnswer(invocation -> {
+            Student student = invocation.getArgument(0);
+            student.setKeycloakId("keycloakId123");
+            return student;
+        });
 
         Student createdStudent = studentService.createStudent(validStudentDTO);
 
@@ -82,6 +94,7 @@ public class RegisterUserAuthTest {
         verify(studentRepository, times(1)).save(any());
     }
 
+
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
 
@@ -89,7 +102,7 @@ public class RegisterUserAuthTest {
                 .thenReturn(Optional.of(new Student()));
 
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        ResourceAlreadyExists exception = assertThrows(ResourceAlreadyExists.class, () ->
                 studentService.createStudent(validStudentDTO)
         );
         assertEquals("Estudante com este e-mail já existe.", exception.getMessage());
@@ -99,7 +112,7 @@ public class RegisterUserAuthTest {
     void shouldThrowExceptionWhenPasswordTooShort() {
         validStudentDTO.setPassword("ab");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        BusinessException exception = assertThrows(BusinessException.class, () ->
                 studentService.createStudent(validStudentDTO)
         );
         assertEquals("A senha deve ter pelo menos 3 caracteres.", exception.getMessage());
@@ -109,7 +122,7 @@ public class RegisterUserAuthTest {
     void shouldThrowExceptionWhenPasswordHasNoNumber() {
         validStudentDTO.setPassword("Senha@");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        BusinessException exception = assertThrows(BusinessException.class, () ->
                 studentService.createStudent(validStudentDTO)
         );
         assertEquals("A senha deve conter pelo menos 1 número.", exception.getMessage());
@@ -119,7 +132,7 @@ public class RegisterUserAuthTest {
     void shouldThrowExceptionWhenPasswordHasNoUppercaseLetter() {
         validStudentDTO.setPassword("senha@1");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        BusinessException exception = assertThrows(BusinessException.class, () ->
                 studentService.createStudent(validStudentDTO)
         );
         assertEquals("A senha deve conter pelo menos uma letra maiúscula.", exception.getMessage());
@@ -129,7 +142,7 @@ public class RegisterUserAuthTest {
     void shouldThrowExceptionWhenPasswordHasNoSymbol() {
         validStudentDTO.setPassword("Senha1");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        BusinessException exception = assertThrows(BusinessException.class, () ->
                 studentService.createStudent(validStudentDTO)
         );
         assertEquals("A senha deve conter pelo menos um símbolo.", exception.getMessage());
@@ -140,7 +153,7 @@ public class RegisterUserAuthTest {
         when(studentRepository.findByUsername(validStudentDTO.getUsername()))
                 .thenReturn(Optional.of(new Student()));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        ResourceAlreadyExists exception = assertThrows(ResourceAlreadyExists.class, () ->
                 studentService.createStudent(validStudentDTO)
         );
         assertEquals("Estudante com este username já existe.", exception.getMessage());
@@ -150,7 +163,7 @@ public class RegisterUserAuthTest {
     void shouldThrowExceptionWhenEmailIsInvalid() {
         validStudentDTO.setEmail("emailsemarroba.com");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        BusinessException exception = assertThrows(BusinessException.class, () ->
                 studentService.createStudent(validStudentDTO)
         );
         assertEquals("E-mail inválido.", exception.getMessage());
