@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 public class UseKeycloakRegistrationDTO {
     private String username;
     private String email;
-    private String firstName;
-    private String lastName;
+    private String name;
     private String password;
 }

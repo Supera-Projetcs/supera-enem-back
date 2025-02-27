@@ -82,8 +82,7 @@ public class AnswerControllerIntegrationTest {
         student.setBirthDate(birthDate);
         student.setDreamCourse("Computer Science");
         student.setPhone("123456789");
-        student.setFirstName("Test");
-        student.setLastName("User");
+        student.setName("Test User");
         Set<Weekday> weekdays = Set.of(Weekday.MONDAY, Weekday.WEDNESDAY, Weekday.FRIDAY);
         student.setPreferredStudyDays(weekdays);
         studentRepository.save(student);
