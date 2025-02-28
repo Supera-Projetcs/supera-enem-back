@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 
@@ -22,7 +24,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         System.out.println("restrição");
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
@@ -38,28 +40,24 @@ public class WebSecurityConfig {
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtAuthenticationConverter()))
-                )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                );
 
-
-
-        http.cors(AbstractHttpConfigurer::disable);
-        http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
 
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*")); // Permite todas as origens
-        configuration.setAllowedMethods(Arrays.asList("*")); // Métodos permitidos
-        configuration.setAllowedHeaders(Arrays.asList("*")); // Permite todos os headers
-        configuration.setAllowCredentials(false); // Não permite credenciais (obrigatório quando allowedOrigins = "*")
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L); // Cache de preflight requests por 1 hora
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Aplica a configuração a todos os endpoints
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
