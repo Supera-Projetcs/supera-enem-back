@@ -32,6 +32,8 @@ public class TestService {
     private WeeklyReportRepository weeklyReportRepository;
     @Autowired
     private QuestionRepository questionRepository;
+    @Autowired
+    private AuthenticatedService authenticatedService;
 
     public List<TestResponseDTO> getCompletedTests() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -63,6 +65,15 @@ public class TestService {
         return testMapper.toDTO(testEntity);
     }
 
+    public boolean wasThisWeekTestCompleted() {
+        List<TestEntity> testEntities = getThisWeekTests();
+        if (testEntities.isEmpty()) {
+            return false;
+        }
+        TestEntity lastTest = testEntities.get(0);
+        return lastTest.areAllQuestionsAnswered();
+    }
+
     @Transactional
     public TestResponseDTO generateTest() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -84,7 +95,7 @@ public class TestService {
             throw new RuntimeException("Student not found");
         }
 
-        if (hasTestInCurrentWeek(student)) {
+        if (hasTestInCurrentWeek()) {
             throw new RuntimeException("Test for the current week already exists.");
         }
 
@@ -162,18 +173,22 @@ public class TestService {
                 .toList();
     }
 
-    public boolean hasTestInCurrentWeek(Student student) {
+    public boolean hasTestInCurrentWeek() {
+        List<TestEntity> testEntities = getThisWeekTests();
+        return !testEntities.isEmpty();
+    }
+
+    public  List<TestEntity> getThisWeekTests() {
+        Student student = authenticatedService.getAuthenticatedStudent();
         LocalDate now = LocalDate.now();
         LocalDate startOfWeek = now.with(java.time.DayOfWeek.MONDAY);
         LocalDate endOfWeek = now.with(java.time.DayOfWeek.SUNDAY);
 
-        List<TestEntity> testEntities = testRepository.findByStudentAndDateBetween(
+        return testRepository.findByStudentAndDateBetween(
                 student,
                 java.sql.Date.valueOf(startOfWeek),
                 java.sql.Date.valueOf(endOfWeek)
         );
-
-        return !testEntities.isEmpty();
     }
 
 }

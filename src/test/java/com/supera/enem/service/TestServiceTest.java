@@ -628,7 +628,7 @@ class TestServiceTest extends BaseTest {
                 any(java.sql.Date.class)
         )).thenReturn(Collections.emptyList());
 
-        boolean result = testService.hasTestInCurrentWeek(student);
+        boolean result = testService.hasTestInCurrentWeek();
 
         assertFalse(result, "O método deve retornar false quando não existem testes para a semana atual.");
         verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
@@ -657,7 +657,7 @@ class TestServiceTest extends BaseTest {
                 any(java.sql.Date.class)
         )).thenReturn(testEntities);
 
-        boolean result = testService.hasTestInCurrentWeek(student);
+        boolean result = testService.hasTestInCurrentWeek();
 
         assertTrue(result, "O método deve retornar true quando existem testes para a semana atual.");
         verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
@@ -717,8 +717,8 @@ class TestServiceTest extends BaseTest {
                 any(java.sql.Date.class))
         ).thenReturn(currentWeekTests);
 
-        boolean resultFirstCall = testService.hasTestInCurrentWeek(student);
-        boolean resultSecondCall = testService.hasTestInCurrentWeek(student);
+        boolean resultFirstCall = testService.hasTestInCurrentWeek();
+        boolean resultSecondCall = testService.hasTestInCurrentWeek();
 
         assertTrue(resultFirstCall, "A primeira chamada deve retornar true para testes na semana atual.");
         assertTrue(resultSecondCall, "A segunda chamada deve retornar true para testes na semana atual.");
@@ -753,7 +753,7 @@ class TestServiceTest extends BaseTest {
                 any(java.sql.Date.class))
         ).thenReturn(boundaryTests);
 
-        boolean result = testService.hasTestInCurrentWeek(student);
+        boolean result = testService.hasTestInCurrentWeek();
 
         assertTrue(result, "O método deve retornar true para testes que estão no início ou fim da semana atual.");
 

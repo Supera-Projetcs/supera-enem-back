@@ -13,6 +13,7 @@ public interface TestRepository extends JpaRepository<TestEntity, Long> {
     @Query("SELECT t FROM TestEntity t WHERE t.date <= CURRENT_DATE")
     List<TestEntity> findCompletedTests();
 
+    @Query("SELECT t FROM TestEntity t WHERE t.student = :student AND t.date BETWEEN :startDate AND :endDate ORDER BY t.date DESC")
     List<TestEntity> findByStudentAndDateBetween(Student student, java.sql.Date startDate, java.sql.Date endDate);
 
     long countByStudent(Student student);

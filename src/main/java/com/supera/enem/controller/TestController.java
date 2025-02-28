@@ -33,5 +33,10 @@ public class TestController {
         return ResponseEntity.ok(testService.getTestById(id));
     }
 
+    @GetMapping("/is-last-test-completed")
+    public ResponseEntity<Boolean> isLastTestCompleted() {
+        return ResponseEntity.ok(testService.wasThisWeekTestCompleted());
+    }
+
 
 }
