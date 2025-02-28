@@ -76,30 +76,13 @@ public class TestService {
 
     @Transactional
     public TestResponseDTO generateTest() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new RuntimeException("User not authenticated");
-        }
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        String keycloakId = jwt.getClaim("sub");
-
-        //validação para a ausencia do sub no jwt
-        if (keycloakId == null) {
-            throw new RuntimeException("User not authenticated");
-        }
-
-
-        Student student = studentRepository.findByKeycloakId(keycloakId);
-
-        if (student == null) {
-            throw new RuntimeException("Student not found");
-        }
+        Student student = authenticatedService.getAuthenticatedStudent();
 
         if (hasTestInCurrentWeek()) {
             throw new RuntimeException("Test for the current week already exists.");
         }
 
-        WeeklyReport lastWeeklyReport = getLastWeeklyReportByStudent(student);
+        WeeklyReport lastWeeklyReport = getLastWeeklyReportByStudent();
         if (lastWeeklyReport == null) {
             throw new RuntimeException("No weekly report found for the student");
         }
@@ -133,23 +116,8 @@ public class TestService {
         return testMapper.toDTO(testEntity);
     }
 
-    public WeeklyReport getLastWeeklyReportByStudent(Student student) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new RuntimeException("User not authenticated");
-        }
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        String keycloakId = jwt.getClaim("sub");
-
-        //validação para a ausencia do sub no jwt
-        if (keycloakId == null) {
-            throw new RuntimeException("User not authenticated");
-        }
-
-        if (student == null) {
-            throw new IllegalArgumentException("Student must not be null");
-        }
-
+    public WeeklyReport getLastWeeklyReportByStudent() {
+        Student student = authenticatedService.getAuthenticatedStudent();
         return weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId())
                 .orElseThrow(() -> new RuntimeException("Weekly report not found"));
     }
@@ -175,6 +143,7 @@ public class TestService {
 
     public boolean hasTestInCurrentWeek() {
         List<TestEntity> testEntities = getThisWeekTests();
+        System.out.println("puta testes: " + testEntities);
         return !testEntities.isEmpty();
     }
 

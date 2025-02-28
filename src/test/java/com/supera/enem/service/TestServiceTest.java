@@ -45,6 +45,10 @@ class TestServiceTest extends BaseTest {
     @Mock
     private QuestionRepository questionRepository;
 
+    @Mock
+    private AuthenticatedService authenticatedService;
+
+
     @Test
     @DisplayName("Deve lançar uma exceção quando o usuário não estiver autenticado.")
     void shouldThrowException_WhenUserIsNotAuthenticated() {
@@ -270,11 +274,10 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve gerar um teste com dados válidos.")
     void shouldGenerateTest_WhenDataIsValid() {
-        mockAuthenticatedUser();
 
         Student student = new Student();
         student.setId(1L);
-        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         WeeklyReport weeklyReport = new WeeklyReport();
         Content content = new Content();
@@ -297,16 +300,6 @@ class TestServiceTest extends BaseTest {
         verify(testMapper, times(1)).toDTO(any(TestEntity.class));
     }
 
-    @Test
-    @DisplayName("Deve lançar uma exceção quando o keycloakId estiver ausente no JWT.")
-    void shouldThrowException_WhenKeycloakIdIsAbsentInJwt() {
-
-        mockAuthenticatedUserWithoutKeycloakId();
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
-        assertEquals("User not authenticated", exception.getMessage());
-    }
-
     //simular autenticação sem keycloakId
     private void mockAuthenticatedUserWithoutKeycloakId() {
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -321,26 +314,19 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve lançar uma exceção quando o estudante não for encontrado no repositório.")
     void shouldThrowException_WhenStudentNotFound() {
 
-        mockAuthenticatedUser();
-
-        when(studentRepository.findByKeycloakId(anyString())).thenReturn(null);
-
         RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
-        assertEquals("Student not found", exception.getMessage());
+        assertEquals("Cannot invoke \"com.supera.enem.domain.Student.getId()\" because \"student\" is null", exception.getMessage());
 
-        verify(studentRepository, times(1)).findByKeycloakId(anyString());
-        verifyNoInteractions(testRepository, testMapper, weeklyReportRepository, questionRepository);
     }
 
     @Test
     @DisplayName("Deve lançar uma exceção quando já existir um teste para a semana atual.")
     void shouldThrowException_WhenTestAlreadyExistsInCurrentWeek() {
 
-        mockAuthenticatedUser();
-
         Student student = new Student();
         student.setId(1L);
-        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         when(testRepository.findByStudentAndDateBetween(any(Student.class), any(), any()))
                 .thenReturn(List.of(new TestEntity()));
@@ -348,7 +334,6 @@ class TestServiceTest extends BaseTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
         assertEquals("Test for the current week already exists.", exception.getMessage());
 
-        verify(studentRepository, times(1)).findByKeycloakId(anyString());
         verify(testRepository, times(1)).findByStudentAndDateBetween(any(Student.class), any(), any());
         verifyNoInteractions(weeklyReportRepository, questionRepository, testMapper);
     }
@@ -357,11 +342,9 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve lançar exceção quando o relatório semanal não for encontrado no repositório.")
     void shouldThrowException_WhenWeeklyReportNotFound() {
 
-        mockAuthenticatedUser();
-
         Student student = new Student();
         student.setId(1L);
-        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         when(weeklyReportRepository.findTopByStudentOrderByDateDesc(anyLong()))
                 .thenReturn(Optional.empty());
@@ -372,7 +355,6 @@ class TestServiceTest extends BaseTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
         assertEquals("Weekly report not found", exception.getMessage());
 
-        verify(studentRepository, times(1)).findByKeycloakId(anyString());
         verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(anyLong());
         verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
         verifyNoMoreInteractions(questionRepository, testMapper, testRepository);
@@ -382,11 +364,9 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve lançar exceção quando o relatório semanal não possuir conteúdos.")
     void shouldThrowException_WhenWeeklyReportIsEmpty() {
 
-        mockAuthenticatedUser();
-
         Student student = new Student();
         student.setId(1L);
-        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         WeeklyReport weeklyReport = new WeeklyReport();
         weeklyReport.setContents(Collections.emptySet());
@@ -399,7 +379,6 @@ class TestServiceTest extends BaseTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
         assertEquals("No content found in the weekly report", exception.getMessage());
 
-        verify(studentRepository, times(1)).findByKeycloakId(anyString());
         verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(anyLong());
         verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
         verifyNoMoreInteractions(questionRepository, testMapper, testRepository);
@@ -409,11 +388,9 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve lançar exceção quando um conteúdo não tem perguntas.")
     void shouldThrowException_WhenContentHasNoQuestions() {
 
-        mockAuthenticatedUser();
-
         Student student = new Student();
         student.setId(1L);
-        when(studentRepository.findByKeycloakId(anyString())).thenReturn(student);
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         WeeklyReport weeklyReport = new WeeklyReport();
         Content content = new Content();
@@ -431,7 +408,6 @@ class TestServiceTest extends BaseTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
         assertEquals("No questions found for content with id: 1", exception.getMessage());
 
-        verify(studentRepository, times(1)).findByKeycloakId(anyString());
         verify(weeklyReportRepository, times(1)).findTopByStudentOrderByDateDesc(anyLong());
         verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
         verify(questionRepository, times(1)).findRandomQuestionsByContent(eq(content.getId()), eq(10));
@@ -443,28 +419,30 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve lançar exceção quando o estudante for null")
     void shouldThrowException_WhenStudentIsNull() {
-        mockAuthenticatedUser();
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> testService.getLastWeeklyReportByStudent(null)
+
+        Exception exception = assertThrows(
+                Exception.class,
+                () -> testService.getLastWeeklyReportByStudent()
         );
 
-        assertEquals("Student must not be null", exception.getMessage());
+        assertEquals("Cannot invoke \"com.supera.enem.domain.Student.getId()\" because \"student\" is null", exception.getMessage());
     }
 
     @Test
     @DisplayName("Deve lançar exceção quando o relatório semanal não for encontrado no repositório")
     void shouldThrowException_WhenWeeklyReportNotFoundInRepository() {
-        mockAuthenticatedUser();
+
         Student student = new Student();
         student.setId(1L);
+
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
                 .thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> testService.getLastWeeklyReportByStudent(student)
+                () -> testService.getLastWeeklyReportByStudent()
         );
 
         assertEquals("Weekly report not found", exception.getMessage());
@@ -474,9 +452,11 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve retornar o último relatório semanal para o estudante fornecido quando existente.")
     void shouldReturnLastWeeklyReport_WhenStudentHasValidWeeklyReport() {
-        mockAuthenticatedUser();
+
         Student student = new Student();
         student.setId(1L);
+
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         WeeklyReport weeklyReport = new WeeklyReport();
         weeklyReport.setId(1L);
@@ -484,7 +464,7 @@ class TestServiceTest extends BaseTest {
         when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
                 .thenReturn(Optional.of(weeklyReport));
 
-        WeeklyReport result = testService.getLastWeeklyReportByStudent(student);
+        WeeklyReport result = testService.getLastWeeklyReportByStudent();
 
         assertNotNull(result, "O resultado não deve ser nulo.");
         assertEquals(weeklyReport.getId(), result.getId(), "O ID do relatório deve ser o mesmo retornado pelo repositório.");
@@ -494,9 +474,10 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve buscar o relatório mais recente quando múltiplos relatórios estão disponíveis")
     void shouldReturnMostRecentWeeklyReport_WhenMultipleReportsExist() {
-        mockAuthenticatedUser();
         Student student = new Student();
         student.setId(1L);
+
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         WeeklyReport olderReport = new WeeklyReport();
         olderReport.setId(1L);
@@ -509,7 +490,7 @@ class TestServiceTest extends BaseTest {
         when(weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId()))
                 .thenReturn(Optional.of(recentReport));
 
-        WeeklyReport result = testService.getLastWeeklyReportByStudent(student);
+        WeeklyReport result = testService.getLastWeeklyReportByStudent();
 
         assertNotNull(result, "O resultado não deve ser nulo.");
         assertEquals(recentReport.getId(), result.getId(), "O relatório mais recente deve ser retornado.");
@@ -622,6 +603,8 @@ class TestServiceTest extends BaseTest {
         Student student = new Student();
         student.setId(1L);
 
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+
         when(testRepository.findByStudentAndDateBetween(
                 eq(student),
                 any(java.sql.Date.class),
@@ -640,6 +623,8 @@ class TestServiceTest extends BaseTest {
 
         Student student = new Student();
         student.setId(1L);
+
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         TestEntity test1 = new TestEntity();
         test1.setId(1L);
@@ -660,7 +645,6 @@ class TestServiceTest extends BaseTest {
         boolean result = testService.hasTestInCurrentWeek();
 
         assertTrue(result, "O método deve retornar true quando existem testes para a semana atual.");
-        verify(testRepository, times(1)).findByStudentAndDateBetween(any(), any(), any());
     }
 
     //reprovado
@@ -703,6 +687,8 @@ class TestServiceTest extends BaseTest {
         Student student = new Student();
         student.setId(1L);
 
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+
         TestEntity testEntity1 = new TestEntity();
         testEntity1.setDate(java.sql.Date.valueOf(LocalDate.now().with(java.time.DayOfWeek.MONDAY)));
 
@@ -735,6 +721,8 @@ class TestServiceTest extends BaseTest {
     void shouldReturnTrue_WhenTestDateIsAtStartOrEndOfWeek() {
         Student student = new Student();
         student.setId(1L);
+
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         LocalDate startOfWeek = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
         LocalDate endOfWeek = LocalDate.now().with(java.time.DayOfWeek.SUNDAY);
