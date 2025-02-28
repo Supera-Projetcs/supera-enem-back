@@ -22,19 +22,19 @@ services:
     ports:
       - "5432:5432"
 
-  app:
-    build:
-      context: .
-      dockerfile: ./compose/spring/Dockerfile
-    image: supera_enem-app:latest
-    env_file:
-      - .env
-    ports:
-      - "8080:8080"
-    depends_on:
-      - keycloak
-      - postgres
-      - minio
+#  app:
+#    build:
+#      context: .
+#      dockerfile: ./compose/spring/Dockerfile
+#    image: supera_enem-app:latest
+#    env_file:
+#      - .env
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - keycloak
+#      - postgres
+#      - minio
 
   grafana:
     image: grafana/grafana

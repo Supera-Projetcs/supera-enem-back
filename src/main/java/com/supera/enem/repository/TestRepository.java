@@ -14,4 +14,6 @@ public interface TestRepository extends JpaRepository<TestEntity, Long> {
     List<TestEntity> findCompletedTests();
 
     List<TestEntity> findByStudentAndDateBetween(Student student, java.sql.Date startDate, java.sql.Date endDate);
+
+    long countByStudent(Student student);
 }
