@@ -33,12 +33,6 @@ jobs:
       - name: Run tests
         run: mvn test -Dtest=com.supera.enem.service.**
 
-      - name: Build project
-        run: mvn clean install -DskipTests
-
-      - name: Build Docker image
-        run: docker build -t app -f ./compose/spring/Dockerfile .
-
       - name: SSH Deploy
         uses: appleboy/ssh-action@master
         with:
