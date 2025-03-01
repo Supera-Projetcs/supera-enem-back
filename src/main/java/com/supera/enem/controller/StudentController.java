@@ -4,6 +4,7 @@ import com.supera.enem.controller.DTOS.Student.*;
 import com.supera.enem.controller.DTOS.StudentSubject.StudentSubjectRequestDTO;
 import com.supera.enem.controller.DTOS.StudentSubject.StudentSubjectResponseDTO;
 import com.supera.enem.domain.Student;
+import com.supera.enem.domain.enums.Weekday;
 import com.supera.enem.service.KeycloackUserService;
 import com.supera.enem.service.StudentService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/students")
@@ -74,6 +76,14 @@ public class StudentController {
         return ResponseEntity.ok(studentService.createStudentSubjects(id,studentSubjectRequestDTOList));
     }
 
+    @PatchMapping("/{studentId}/study-days")
+    public ResponseEntity<Student> updateStudyDays(
+            @PathVariable Long studentId,
+            @RequestBody Set<Weekday> studyDays
+    ) {
+        Student updatedStudent = studentService.updatePreferredStudyDays(studentId, studyDays);
+        return ResponseEntity.ok(updatedStudent);
+    }
 
 }
 
