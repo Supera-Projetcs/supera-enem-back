@@ -6,6 +6,7 @@ import com.supera.enem.controller.DTOS.StudentSubject.*;
 
 import com.supera.enem.domain.*;
 
+import com.supera.enem.domain.enums.Weekday;
 import com.supera.enem.exception.*;
 import com.supera.enem.mapper.*;
 
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -42,7 +44,6 @@ public class StudentService {
 
     @Autowired
     private StudentSubjectMapper studentSubjectMapper;
-
 
     public Student getStudentById(Long id) {
         return studentRepository.findById(id)
@@ -156,6 +157,18 @@ public class StudentService {
         studentSubjectRepository.saveAll(listStudentSubjects);
 
         return listStudentSubjects.stream().map(studentSubjectMapper::toDto).collect(Collectors.toList());
+    }
+
+    public Student updatePreferredStudyDays(Long studentId, Set<Weekday> studyDays) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Estudante não encontrado"));
+
+        if (studyDays == null || studyDays.isEmpty()) {
+            throw new BusinessException("Os dias de estudo não podem ser vazios.");
+        }
+
+        student.setPreferredStudyDays(studyDays);
+        return studentRepository.save(student);
     }
 
 
