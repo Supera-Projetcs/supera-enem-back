@@ -76,5 +76,14 @@ public class StudentController {
         return ResponseEntity.ok(studentService.createStudentSubjects(id,studentSubjectRequestDTOList));
     }
 
+    @PatchMapping("/{studentId}/study-days")
+    public ResponseEntity<Student> updateStudyDays(
+            @PathVariable Long studentId,
+            @RequestBody Set<Weekday> studyDays
+    ) {
+        Student updatedStudent = studentService.updatePreferredStudyDays(studentId, studyDays);
+        return ResponseEntity.ok(updatedStudent);
+    }
+
 }
 
