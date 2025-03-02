@@ -47,27 +47,21 @@ public class PerformanceService {
         }
 
         List<Object[]> results = performanceRepository.findAveragePerformanceBySubject(studentId);
-
         return results.stream().map(result -> {
             String subjectName = (String) result[0];
             double avgPerformance = ((Number) result[1]).doubleValue();
 
-            if (avgPerformance < 0 || avgPerformance > 100) {
-                throw new IllegalArgumentException("Invalid performance value: " + avgPerformance);
+            // Convertendo de -1.0 a 1.0 para 0 a 100
+            double percentage = ((avgPerformance + 1) / 2) * 100;
+
+            if (percentage < 0 || percentage > 100) {
+                throw new IllegalArgumentException("Invalid performance value after conversion: " + percentage);
             }
 
-            String difficulty;
-            if (avgPerformance > 70) {
-                difficulty = "EASY";
-            } else if (avgPerformance >= 40) {
-                difficulty = "MEDIUM";
-            } else {
-                difficulty = "HARD";
-            }
-
-            return new SubjectDifficultyDTO(subjectName, difficulty);
+            return new SubjectDifficultyDTO(subjectName, percentage);
         }).collect(Collectors.toList());
     }
+
 
 
     public List<PerformaceResponseDTO> createInitialPerformance(Long studentId, List<InitialPerformaceRequestDTO> listDto) {
