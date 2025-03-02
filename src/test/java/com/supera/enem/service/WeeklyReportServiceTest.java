@@ -3,6 +3,7 @@ package com.supera.enem.service;
 import com.supera.enem.controller.DTOS.AlitaRequestDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
+import com.supera.enem.controller.DTOS.WeeklyReportResponseDTO;
 import com.supera.enem.domain.Content;
 import com.supera.enem.domain.Performance;
 import com.supera.enem.domain.Student;
@@ -151,7 +152,7 @@ class WeeklyReportServiceTest {
                 .thenReturn(existingReport);
         when(weeklyReportMapper.toDto(existingReport)).thenReturn(reportDTO);
 
-        WeeklyReportDTO result = weeklyReportService.getWeeklyReport();
+        WeeklyReportResponseDTO result = weeklyReportService.getWeeklyReport();
 
         assertNotNull(result);
         assertEquals(reportDTO.getId(), result.getId());
@@ -174,7 +175,7 @@ class WeeklyReportServiceTest {
 
 
         // Act
-        WeeklyReportDTO result = weeklyReportService.getWeeklyReport();
+        WeeklyReportResponseDTO result = weeklyReportService.getWeeklyReport();
 
         // Assert
         assertNotNull(result);

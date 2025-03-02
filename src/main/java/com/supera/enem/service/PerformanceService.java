@@ -41,6 +41,13 @@ public class PerformanceService {
     @Autowired
     private StudentRepository studentRepository;
 
+
+    public List<Performance> getLatestPerformancesByStudent(Long studentId) {
+        if (studentId == null) {
+            throw new IllegalArgumentException("Student ID must not be null");
+        }
+        return performanceRepository.findAllByStudent_Id(studentId);
+    }
     public List<SubjectDifficultyDTO> getSubjectDifficulties(Long studentId) {
         if (studentId == null) {
             throw new IllegalArgumentException("Student ID must not be null");

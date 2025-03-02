@@ -24,6 +24,11 @@ public class PerformanceController {
         return performanceService.getSubjectDifficulties(studentId);
     }
 
+    @GetMapping("/{studentId}")
+    public List<Performance> getPerformace(@PathVariable Long studentId) {
+        return performanceService.getLatestPerformancesByStudent(studentId);
+    }
+
     @PostMapping("/initial-performace/{studentId}")
     public ResponseEntity<List<PerformaceResponseDTO>> createInitialPerformance(@PathVariable Long studentId, @RequestBody List<InitialPerformaceRequestDTO> dto) {
         return ResponseEntity.ok(performanceService.createInitialPerformance(studentId, dto));
