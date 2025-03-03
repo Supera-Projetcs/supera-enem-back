@@ -1,7 +1,9 @@
 package com.supera.enem.domain;
 import com.supera.enem.domain.enums.TestType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -10,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Getter
 @Setter
@@ -39,6 +43,19 @@ public class TestEntity {
             inverseJoinColumns = @JoinColumn(name = "question_id")
     )
     private List<Question> questions = new ArrayList<>();
+
+    public int getTotalQuestions() {
+        return this.questions != null ? this.questions.size() : 0;
+    }
+
+    public int getTotalCorrectAnswers() {
+        if (this.answers == null || this.answers.isEmpty()) {
+            return 0;
+        }
+        return (int) this.answers.stream()
+                .filter(Answer::isCorrect)
+                .count();
+    }
 
     @OneToMany(mappedBy = "testEntity", fetch = FetchType.LAZY)
     private List<Answer> answers = new ArrayList<>();

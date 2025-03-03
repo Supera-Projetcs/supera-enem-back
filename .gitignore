@@ -5,6 +5,7 @@ target/
 !**/src/testEntity/**/target/
 
 .env
+.dev.env
 .envs/*
 
 #src/main/resources/application.properties

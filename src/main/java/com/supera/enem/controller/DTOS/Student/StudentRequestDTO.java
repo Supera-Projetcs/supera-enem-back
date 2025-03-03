@@ -35,4 +35,5 @@ public class StudentRequestDTO {
     @NotNull(message = "Senha não pode ser nulo.")
     private String password;
 
+    private boolean onboardingDone;
 }

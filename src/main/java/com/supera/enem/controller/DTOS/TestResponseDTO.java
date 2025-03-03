@@ -5,6 +5,7 @@ import com.supera.enem.domain.enums.TestType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -19,4 +20,8 @@ public class TestResponseDTO {
 
     private StudentResponseDTO student;
     private List<QuestionResponseDTO> questions;
+
+    private int totalQuestions; // Novo campo
+    private int totalCorrectAnswers;
+
 }
