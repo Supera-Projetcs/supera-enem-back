@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SubjectDifficultyDTO {
     private String subjectName;
-    private String difficulty;
+    private Double percentage;
 }

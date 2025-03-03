@@ -2,6 +2,7 @@ package com.supera.enem.controller;
 
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
+import com.supera.enem.controller.DTOS.WeeklyReportResponseDTO;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
 
@@ -26,13 +27,8 @@ public class WeeklyReportController {
     @Autowired
     private AuthenticatedService authenticationService;
 
-    @GetMapping("/{id}")
-    public WeeklyReportDTO getWeeklyReportById(@PathVariable Long id, @AuthenticationPrincipal Student student) {
-        return weeklyReportService.getWeeklyReportById(id, student);
-    }
-
     @GetMapping("/week")
-    public ResponseEntity<WeeklyReportDTO> getWeeklyReport() {
+    public ResponseEntity<WeeklyReportResponseDTO> getWeeklyReport() {
         return ResponseEntity.ok(weeklyReportService.getWeeklyReport());
     }
 

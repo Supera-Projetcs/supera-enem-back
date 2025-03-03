@@ -129,9 +129,9 @@ public class PerformanceControllerIntegrationTest {
     public void testGetSubjectDifficulties_Success() throws Exception {
         // Mock do serviço para retornar a lista de SubjectDifficultyDTO
         List<SubjectDifficultyDTO> subjectDifficulties = Arrays.asList(
-                new SubjectDifficultyDTO("Mathematics", "EASY"),
-                new SubjectDifficultyDTO("Physics", "MEDIUM"),
-                new SubjectDifficultyDTO("Chemistry", "HARD")
+                new SubjectDifficultyDTO("Mathematics", 75.0),
+                new SubjectDifficultyDTO("Physics", 50.0),
+                new SubjectDifficultyDTO("Chemistry", 35.0)
         );
         when(performanceService.getSubjectDifficulties(eq(1L))).thenReturn(subjectDifficulties);
 
@@ -141,11 +141,11 @@ public class PerformanceControllerIntegrationTest {
                 .andDo(print()) // Imprime detalhes da requisição e da resposta
                 .andExpect(status().isOk()) // Espera status 200
                 .andExpect(jsonPath("$[0].subjectName").value("Mathematics")) // Verifica o nome da matéria no JSON
-                .andExpect(jsonPath("$[0].difficulty").value("EASY")) // Verifica a dificuldade no JSON
+                .andExpect(jsonPath("$[0].percentage").value(75.0)) // Verifica a dificuldade no JSON
                 .andExpect(jsonPath("$[1].subjectName").value("Physics"))
-                .andExpect(jsonPath("$[1].difficulty").value("MEDIUM"))
+                .andExpect(jsonPath("$[1].percentage").value(50.0))
                 .andExpect(jsonPath("$[2].subjectName").value("Chemistry"))
-                .andExpect(jsonPath("$[2].difficulty").value("HARD"));
+                .andExpect(jsonPath("$[2].percentage").value(35.0));
     }
 
     @Test

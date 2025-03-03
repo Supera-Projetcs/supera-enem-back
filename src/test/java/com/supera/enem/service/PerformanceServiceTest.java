@@ -34,7 +34,7 @@ public class PerformanceServiceTest {
     @DisplayName("Deve retornar dificuldade EASY para alta performance")
     void shouldReturnEasyDifficultyForHighPerformance() {
 
-        List<Object[]> mockResults = Arrays.<Object[]>asList(new Object[]{"Matemática", 85.0});
+        List<Object[]> mockResults = Arrays.<Object[]>asList(new Object[]{"Matemática", 1});
         when(performanceRepository.findAveragePerformanceBySubject(STUDENT_ID)).thenReturn(mockResults);
 
         List<SubjectDifficultyDTO> result = performanceService.getSubjectDifficulties(STUDENT_ID);
@@ -42,44 +42,14 @@ public class PerformanceServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Matemática", result.get(0).getSubjectName());
-        assertEquals("EASY", result.get(0).getDifficulty());
+        assertEquals(100, result.get(0).getPercentage());
 
         verify(performanceRepository, times(1)).findAveragePerformanceBySubject(STUDENT_ID);
     }
 
-    @Test
-    @DisplayName("Deve retornar dificuldade MEDIUM para performance média")
-    void shouldReturnMediumDifficultyForAveragePerformance() {
 
-        List<Object[]> mockResults = Arrays.<Object[]>asList(new Object[]{"Ciências", 55.0});
-        when(performanceRepository.findAveragePerformanceBySubject(STUDENT_ID)).thenReturn(mockResults);
 
-        List<SubjectDifficultyDTO> result = performanceService.getSubjectDifficulties(STUDENT_ID);
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Ciências", result.get(0).getSubjectName());
-        assertEquals("MEDIUM", result.get(0).getDifficulty());
-
-        verify(performanceRepository, times(1)).findAveragePerformanceBySubject(STUDENT_ID);
-    }
-
-    @Test
-    @DisplayName("Deve retornar dificuldade HARD para baixa performance")
-    void shouldReturnHardDifficultyForLowPerformance() {
-
-        List<Object[]> mockResults = Arrays.<Object[]>asList(new Object[]{"História", 25.0});
-        when(performanceRepository.findAveragePerformanceBySubject(STUDENT_ID)).thenReturn(mockResults);
-
-        List<SubjectDifficultyDTO> result = performanceService.getSubjectDifficulties(STUDENT_ID);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("História", result.get(0).getSubjectName());
-        assertEquals("HARD", result.get(0).getDifficulty());
-
-        verify(performanceRepository, times(1)).findAveragePerformanceBySubject(STUDENT_ID);
-    }
 
     @Test
     @DisplayName("Deve retornar lista vazia quando nenhum dado for encontrado")
@@ -116,7 +86,7 @@ public class PerformanceServiceTest {
                 () -> performanceService.getSubjectDifficulties(STUDENT_ID)
         );
 
-        assertEquals("Invalid performance value: -10.0", exception.getMessage());
+        assertEquals("Invalid performance value: -450.0", exception.getMessage());
     }
 
     @Test
@@ -124,8 +94,8 @@ public class PerformanceServiceTest {
     void shouldReturnMediumDifficultyForBoundaryValues() {
 
         List<Object[]> mockResults = Arrays.<Object[]>asList(
-                new Object[]{"Geografia", 70.0},
-                new Object[]{"Biologia", 40.0}
+                new Object[]{"Geografia", 0},
+                new Object[]{"Biologia", 0.5}
         );
         when(performanceRepository.findAveragePerformanceBySubject(STUDENT_ID)).thenReturn(mockResults);
 
@@ -134,18 +104,18 @@ public class PerformanceServiceTest {
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("Geografia", result.get(0).getSubjectName());
-        assertEquals("MEDIUM", result.get(0).getDifficulty());
+        assertEquals(50.0, result.get(0).getPercentage());
         assertEquals("Biologia", result.get(1).getSubjectName());
-        assertEquals("MEDIUM", result.get(1).getDifficulty());
+        assertEquals(75.0, result.get(1).getPercentage());
     }
 
     @Test
     @DisplayName("Deve retornar dificuldades misturadas para múltiplas disciplinas")
     void shouldReturnMixedDifficultiesForMultipleSubjects() {
         List<Object[]> mockResults = Arrays.<Object[]>asList(
-                new Object[]{"Matemática", 85.0},
-                new Object[]{"Ciências", 50.0},
-                new Object[]{"História", 30.0}
+                new Object[]{"Matemática", 1},
+                new Object[]{"Ciências", 0},
+                new Object[]{"História", -0.5}
         );
         when(performanceRepository.findAveragePerformanceBySubject(STUDENT_ID)).thenReturn(mockResults);
 
@@ -154,10 +124,10 @@ public class PerformanceServiceTest {
         assertNotNull(result);
         assertEquals(3, result.size());
         assertEquals("Matemática", result.get(0).getSubjectName());
-        assertEquals("EASY", result.get(0).getDifficulty());
+        assertEquals(100, result.get(0).getPercentage());
         assertEquals("Ciências", result.get(1).getSubjectName());
-        assertEquals("MEDIUM", result.get(1).getDifficulty());
+        assertEquals(50.0, result.get(1).getPercentage());
         assertEquals("História", result.get(2).getSubjectName());
-        assertEquals("HARD", result.get(2).getDifficulty());
+        assertEquals(25.0, result.get(2).getPercentage());
     }
 }

@@ -25,15 +25,16 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
 
 
     @Query("""
-        SELECT p
-        FROM Performance p
-        WHERE p.student.id = :studentId
-          AND p.createdAt = (
-              SELECT MAX(p2.createdAt)
-              FROM Performance p2
-              WHERE p2.student.id = :studentId
-                AND p2.content.id = p.content.id
-          )
+          SELECT p\s
+            FROM Performance p\s
+            WHERE p.student.id = :studentId\s
+              AND p.createdAt = (
+                  SELECT MAX(p2.createdAt)\s
+                  FROM Performance p2\s
+                  WHERE p2.student.id = :studentId\s
+                    AND p2.content.id = p.content.id
+              )
+            ORDER BY p.content.id, p.createdAt DESC
     """)
     List<Performance> findLatestPerformancesByStudent(@Param("studentId") Long studentId);
 

@@ -4,6 +4,7 @@ import com.supera.enem.controller.DTOS.AlitaRequestDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportDTO;
 import com.supera.enem.controller.DTOS.WeeklyReportRequestDTO;
 
+import com.supera.enem.controller.DTOS.WeeklyReportResponseDTO;
 import com.supera.enem.domain.*;
 
 import com.supera.enem.exception.ResourceNotFoundException;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -44,12 +46,12 @@ public class WeeklyReportService {
 
     @Autowired
     private RestTemplate restTemplate;
-    @Autowired
-    private PerformanceMapper performanceMapper;
+
     @Autowired
     private StudentSubjectRepository studentSubjectRepository;
-    @Autowired
-    private SubjectRepository subjectRepository;
+
+    @Value("${alitaUrl}")
+    private String alitaUrl;
 
 
     public WeeklyReportDTO getWeeklyReportById(Long id, Student student) {
@@ -57,12 +59,15 @@ public class WeeklyReportService {
       return weeklyReportMapper.toDto(weeklyReport);
     }
 
-    private List<AlitaRequestDTO> getAlitaReportsByStudent(Long studentId) {
-        String url = "http://alita.yasc.com.br/contents/";
-        List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(studentId);
+    private List<AlitaRequestDTO> getAlitaReportsByStudent(Student student) {
+
+        String url = alitaUrl + "/contents/?number_or_contents=" + student.getPreferredStudyDays().size() * 3;
+        List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(student.getId());
 
         List<AlitaRequestDTO> alitaList =  performances.stream().map(performance -> {
-            Double pesoSubclasse = studentSubjectRepository.findStudentSubjectBySubject_Id(performance.getContent().getSubject().getId()).getSubjectWeight();
+            System.out.println(performance.getContent().getSubject().getId());
+            Double pesoSubclasse = studentSubjectRepository
+                    .findStudentSubjectBySubject_IdAndStudent_Id(performance.getContent().getSubject().getId(), student.getId()).get().getSubjectWeight();
 
             AlitaRequestDTO alitaRequestDTO = new AlitaRequestDTO();
             alitaRequestDTO.setId(performance.getContent().getId());
@@ -72,8 +77,12 @@ public class WeeklyReportService {
             alitaRequestDTO.setClasse(performance.getContent().getName());
             alitaRequestDTO.setSubclasse(performance.getContent().getSubject().getName());
             alitaRequestDTO.setPeso_da_subclasse(pesoSubclasse);
+
+            System.out.println(alitaRequestDTO);
             return alitaRequestDTO;
         }).toList();
+
+
 
         try {
             System.out.println("Enviando requisição para o servidor: " + alitaList);
@@ -122,25 +131,40 @@ public class WeeklyReportService {
         return weeklyReport;
     }
 
-    public WeeklyReportDTO getWeeklyReport() {
+    public WeeklyReportResponseDTO convertToDto(WeeklyReport weeklyReport) {
+
+        List<Content> sortedContents = weeklyReport.getContents().stream()
+                .sorted((content1, content2) -> Long.compare(content2.getId(), content1.getId()))
+                .collect(Collectors.toList());
+
+
+        WeeklyReportResponseDTO dto = new WeeklyReportResponseDTO();
+        dto.setId(weeklyReport.getId());
+        dto.setDate(weeklyReport.getDate());
+        dto.setContents(sortedContents);
+
+        return dto;
+    }
+
+    public WeeklyReportResponseDTO getWeeklyReport() {
         Student student = authenticatedService.getAuthenticatedStudent();
         LocalDate currentDate = LocalDate.now();
         LocalDate weekStart = currentDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
         LocalDate weekEnd = currentDate.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
 
+
         WeeklyReport existingReport = weeklyReportRepository
                 .findByStudentIdAndDateBetween(student.getId(), weekStart, weekEnd);
 
         if (existingReport != null) {
-            return weeklyReportMapper.toDto(existingReport);
+            return this.convertToDto(existingReport);
         }
 
         System.out.println("Generating new weekly report for student: " + student.getId());
 
-        List<AlitaRequestDTO> newWeeklyReport = getAlitaReportsByStudent(student.getId());
+        List<AlitaRequestDTO> newWeeklyReport = this.getAlitaReportsByStudent(student);
         WeeklyReport weeklyReport = generateWeeklyReport(newWeeklyReport, student);
-        System.out.println(weeklyReport);
-        return  weeklyReportMapper.toDto(weeklyReportRepository.save(weeklyReport));
+        return  this.convertToDto(weeklyReportRepository.save(weeklyReport));
     }
 
     public WeeklyReportDTO updateWeeklyReport(WeeklyReportRequestDTO weeklyReportRequestDTO, Long id) {
