@@ -84,7 +84,8 @@ public class TestService {
         Student student = authenticatedService.getAuthenticatedStudent();
 
         if (hasTestInCurrentWeek()) {
-            throw new ResourceAlreadyExists("Test for the current week already exists.");
+            TestEntity test = getThisWeekTests().get(0);
+            return testMapper.toDTO(test);
         }
 
         WeeklyReport lastWeeklyReport = getLastWeeklyReportByStudent();
