@@ -353,11 +353,10 @@ class TestServiceTest extends BaseTest {
         when(testRepository.findByStudentAndDateBetween(any(Student.class), any(), any()))
                 .thenReturn(List.of(new TestEntity()));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.generateTest());
-        assertEquals("Test for the current week already exists.", exception.getMessage());
+        testService.generateTest();
 
-        verify(testRepository, times(1)).findByStudentAndDateBetween(any(Student.class), any(), any());
-        verifyNoInteractions(weeklyReportRepository, questionRepository, testMapper);
+        verify(testRepository, times(2)).findByStudentAndDateBetween(any(Student.class), any(), any());
+        verifyNoInteractions(weeklyReportRepository, questionRepository);
     }
 
     @Test

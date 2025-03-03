@@ -3,6 +3,7 @@ package com.supera.enem.controller;
 import com.supera.enem.controller.DTOS.TestResponseDTO;
 import com.supera.enem.domain.TestEntity;
 import com.supera.enem.exception.GlobalExceptionHandler;
+import com.supera.enem.mapper.TestMapper;
 import com.supera.enem.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,10 +24,23 @@ public class TestController {
     private TestService testService;
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    @Autowired
+    private TestMapper testMapper;
 
     @PostMapping("/generate")
     public TestResponseDTO generateTest() {
         return testService.generateTest();
+    }
+
+    @GetMapping("/this-week-test")
+    public ResponseEntity<TestResponseDTO> getThisWeekTest() {
+        logger.info("Buscando teste da semana");
+        try {
+            TestEntity test = testService.getThisWeekTests().get(0);
+            return ResponseEntity.ok(testMapper.toDTO(test));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/completed")
