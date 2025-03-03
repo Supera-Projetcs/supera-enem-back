@@ -62,7 +62,7 @@ public class PerformanceService {
             double percentage = ((avgPerformance + 1) / 2) * 100;
 
             if (percentage < 0 || percentage > 100) {
-                throw new IllegalArgumentException("Invalid performance value after conversion: " + percentage);
+                throw new IllegalArgumentException("Invalid performance value: " + percentage);
             }
 
             return new SubjectDifficultyDTO(subjectName, percentage);

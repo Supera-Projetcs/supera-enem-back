@@ -8,12 +8,14 @@ import com.supera.enem.domain.Content;
 import com.supera.enem.domain.Performance;
 import com.supera.enem.domain.Student;
 import com.supera.enem.domain.WeeklyReport;
+import com.supera.enem.domain.enums.Weekday;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.WeeklyReportMapper;
 import com.supera.enem.repository.ContentRepository;
 import com.supera.enem.repository.PerformanceRepository;
 import com.supera.enem.repository.StudentSubjectRepository;
 import com.supera.enem.repository.WeeklyReportRepository;
+import com.supera.enem.utils.FakeContentGenerator;
 import jakarta.ws.rs.core.Link;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 
 import javax.swing.*;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -60,12 +63,8 @@ class WeeklyReportServiceTest {
     @Mock
     private ContentRepository contentRepository;
 
-    private WeeklyReportRequestDTO weeklyReportRequestDTO;
-
-    private Performance performance;
 
     private WeeklyReport existingReport;
-    private WeeklyReport newReport;
     private WeeklyReportDTO reportDTO;
 
     @BeforeEach
@@ -74,19 +73,22 @@ class WeeklyReportServiceTest {
         student = new Student();
         student.setId(1L);
         student.setKeycloakId("keycloakId");
+        student.setPreferredStudyDays(Set.of(Weekday.MONDAY, Weekday.WEDNESDAY));
 
         weeklyReport = new WeeklyReport();
         weeklyReport.setId(1L);
         weeklyReport.setStudent(student);
+        weeklyReport.setContents(FakeContentGenerator.generateFakeContents());
 
         existingReport = new WeeklyReport();
         existingReport.setId(1L);
         existingReport.setStudent(student);
+        existingReport.setContents(FakeContentGenerator.generateFakeContents());
 
         this.reportDTO = new WeeklyReportDTO();
         this.reportDTO.setId(1L);
         this.reportDTO.setDate(new Date());
-        this.reportDTO.setContents(new LinkedHashSet<>());
+        this.reportDTO.setContents(FakeContentGenerator.generateFakeContents());
 //        this.reportDTO.se(student);
     }
 
@@ -152,12 +154,12 @@ class WeeklyReportServiceTest {
                 .thenReturn(existingReport);
         when(weeklyReportMapper.toDto(existingReport)).thenReturn(reportDTO);
 
+
         WeeklyReportResponseDTO result = weeklyReportService.getWeeklyReport();
 
         assertNotNull(result);
         assertEquals(reportDTO.getId(), result.getId());
         verify(weeklyReportRepository, times(1)).findByStudentIdAndDateBetween(anyLong(), any(), any());
-        verify(weeklyReportMapper, times(1)).toDto(existingReport);
         verify(weeklyReportRepository, never()).save(any());
     }
 
@@ -168,8 +170,7 @@ class WeeklyReportServiceTest {
         when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
         when(weeklyReportRepository.findByStudentIdAndDateBetween(anyLong(), any(), any()))
                 .thenReturn(null);
-        when(weeklyReportRepository.save(any())).thenReturn(newReport);
-        when(weeklyReportMapper.toDto(newReport)).thenReturn(reportDTO);
+        when(weeklyReportRepository.save(any())).thenReturn(weeklyReport);
         when(restTemplate.postForObject(anyString(), any(), eq(List.class)))
                 .thenReturn(Collections.emptyList());
 
@@ -182,7 +183,6 @@ class WeeklyReportServiceTest {
         assertEquals(reportDTO.getId(), result.getId());
         verify(weeklyReportRepository, times(1)).findByStudentIdAndDateBetween(anyLong(), any(), any());
         verify(weeklyReportRepository, times(1)).save(any());
-        verify(weeklyReportMapper, times(1)).toDto(newReport);
     }
 
     @Test

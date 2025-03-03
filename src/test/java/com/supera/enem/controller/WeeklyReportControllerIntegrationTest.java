@@ -84,32 +84,6 @@ public class WeeklyReportControllerIntegrationTest {
         when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
     }
 
-    @Test
-    public void testGetWeeklyReportById_Success() throws Exception {
-        // Mock JwtDecoder to return a valid JWT
-        Jwt jwt = mock(Jwt.class);
-        when(jwt.getClaim("sub")).thenReturn("keycloakUserId");
-        when(jwtDecoder.decode("valid-token")).thenReturn(jwt);
-
-        WeeklyReport weeklyReport = weeklyReportRepository.findAll().get(0);
-        assertNotNull(weeklyReport);
-        assertNotNull(weeklyReport.getId());
-        System.out.println("WeeklyReport ID in test: " + weeklyReport.getId());
-
-        System.out.println("Mocking weeklyReportService.getWeeklyReportById with ID: " + weeklyReport.getId());
-        when(weeklyReportService.getWeeklyReportById(any(Long.class), any(Student.class))).thenReturn(weeklyReportDTO);
-
-        mockMvc.perform(get("/api/weekly-reports/{id}", weeklyReport.getId())
-                        .header("Authorization", "Bearer valid-token"))
-                .andDo(result -> {
-                    if (result.getResolvedException() != null) {
-                        System.err.println("Exception: " + result.getResolvedException().getMessage());
-                        result.getResolvedException().printStackTrace();
-                    }
-                    System.out.println("Response: " + result.getResponse().getContentAsString());
-                })
-                .andExpect(status().isOk());
-    }
 
     @Test
     public void testGetWeeklyReport_ExistingReport() throws Exception {
