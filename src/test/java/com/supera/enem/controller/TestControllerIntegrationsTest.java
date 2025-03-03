@@ -4,12 +4,16 @@ import com.supera.enem.TestDataUtil;
 import com.supera.enem.controller.DTOS.QuestionResponseDTO;
 import com.supera.enem.controller.DTOS.TestResponseDTO;
 import com.supera.enem.domain.Student;
+import com.supera.enem.domain.TestEntity;
 import com.supera.enem.domain.enums.TestType;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.StudentMapper;
+import com.supera.enem.mapper.TestMapper;
 import com.supera.enem.service.TestService;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -52,6 +56,8 @@ public class TestControllerIntegrationsTest {
     private TestDataUtil testDataUtil;
     @Autowired
     private StudentMapper studentMapper;
+    @Autowired
+    private TestMapper testMapper;
 
     @BeforeEach
     public void setUp() {
@@ -98,20 +104,24 @@ public class TestControllerIntegrationsTest {
     @Test
     public void testGetCompletedTests_Success() throws Exception {
         // Cria a lista de TestResponseDTO com os campos corretos
-        List<TestResponseDTO> completedTests = Arrays.asList(
-                new TestResponseDTO(1L, TestType.WEEKLY, new Date(1666243200000L), studentMapper.toStudentDTO(student), List.of()),
-                new TestResponseDTO(2L, TestType.WEEKLY, new Date(1666329600000L), studentMapper.toStudentDTO(student), List.of())
-        );
+        TestResponseDTO testResponseDTO = new TestResponseDTO(1L, TestType.WEEKLY, new Date(1666243200000L), studentMapper.toStudentDTO(student), List.of());
+        TestResponseDTO testResponseDTO2 = new TestResponseDTO(2L, TestType.WEEKLY, new Date(1666329600000L), studentMapper.toStudentDTO(student), List.of());
+        List<TestEntity> completedTestsList = Arrays.asList(testMapper.toEntity(testResponseDTO), testMapper.toEntity(testResponseDTO2));
 
-        // Mock do serviço para retornar a lista de TestResponseDTO
-        when(testService.getCompletedTests()).thenReturn(completedTests);
+        // Cria um Page de TestResponseDTO
+        Page<TestEntity> completedTests = new PageImpl<>(completedTestsList);
+
+        // Mock do serviço para retornar a lista paginada de TestResponseDTO
+        when(testService.getCompletedTests(0, 10)).thenReturn(completedTests);
 
         // Executa a requisição e verifica o resultado
         mockMvc.perform(get("/api/tests/completed")
+                        .param("page", "0") // Parâmetro de paginação
+                        .param("size", "10") // Parâmetro de tamanho da página
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer valid-token"))
                 .andDo(print()) // Imprime detalhes da requisição e da resposta
-                .andExpect(status().isOk()); // Verifica o tipo do segundo teste no JSON
+                .andExpect(status().isOk());
     }
 
     @Test

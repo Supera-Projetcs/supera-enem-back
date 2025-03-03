@@ -11,6 +11,9 @@ import com.supera.enem.repository.TestRepository;
 import com.supera.enem.repository.WeeklyReportRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -35,15 +38,13 @@ public class TestService {
     @Autowired
     private AuthenticatedService authenticatedService;
 
-    public List<TestResponseDTO> getCompletedTests() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
+    public Page<TestEntity> getCompletedTests(int page, int size) {
+        Student student = authenticatedService.getAuthenticatedStudent();
+        if (student == null) {
             throw new RuntimeException("User not authenticated");
         }
-
-        return testRepository.findCompletedTests().stream()
-                .map(testMapper::toDTO)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+        return testRepository.findCompletedTests(pageable);
     }
 
     @Transactional

@@ -22,6 +22,9 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -52,10 +55,7 @@ class TestServiceTest extends BaseTest {
     @Test
     @DisplayName("Deve lançar uma exceção quando o usuário não estiver autenticado.")
     void shouldThrowException_WhenUserIsNotAuthenticated() {
-
-        mockUnauthenticatedUser();
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.getCompletedTests());
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> testService.getCompletedTests(0, 10));
         assertEquals("User not authenticated", exception.getMessage());
     }
 
@@ -63,9 +63,12 @@ class TestServiceTest extends BaseTest {
     @DisplayName("Deve retornar uma lista de testes concluídos quando bem-sucedido")
     void shouldReturnCompletedTests_WhenSuccessful() {
 
-        mockAuthenticatedUser();
+        Student student = new Student();
+        student.setId(1L);
 
-        //entidades
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+
+        // Entidades
         TestEntity testEntity1 = new TestEntity();
         testEntity1.setId(1L);
         testEntity1.setType(TestType.WEEKLY);
@@ -74,9 +77,14 @@ class TestServiceTest extends BaseTest {
         testEntity2.setId(2L);
         testEntity2.setType(TestType.WEEKLY);
 
-        when(testRepository.findCompletedTests()).thenReturn(List.of(testEntity1, testEntity2));
+        // Cria uma lista de entidades e um Page simulando a resposta do repositório
+        List<TestEntity> testEntities = List.of(testEntity1, testEntity2);
+        Page<TestEntity> testEntityPage = new PageImpl<>(testEntities);
 
-        //mapper convertendo entidades para DTOs
+        // Mock do repositório para retornar a lista paginada de entidades
+        when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(testEntityPage);
+
+        // Mapper convertendo entidades para DTOs
         TestResponseDTO testResponseDTO1 = new TestResponseDTO();
         testResponseDTO1.setId(1L);
         testResponseDTO1.setType(TestType.WEEKLY);
@@ -88,43 +96,57 @@ class TestServiceTest extends BaseTest {
         when(testMapper.toDTO(testEntity1)).thenReturn(testResponseDTO1);
         when(testMapper.toDTO(testEntity2)).thenReturn(testResponseDTO2);
 
-        List<TestResponseDTO> completedTests = testService.getCompletedTests();
+        Page<TestEntity> completedTests = testService.getCompletedTests(0, 10);
 
+        // Verificações
         assertNotNull(completedTests, "A lista de testes completados não deve ser nula.");
-        assertEquals(2, completedTests.size(), "A lista deve conter 2 itens.");
-        assertTrue(completedTests.contains(testResponseDTO1), "A lista deve conter o DTO do teste 1.");
-        assertTrue(completedTests.contains(testResponseDTO2), "A lista deve conter o DTO do teste 2.");
-        verify(testRepository, times(1)).findCompletedTests();
-        verify(testMapper, times(2)).toDTO(any(TestEntity.class));
+        assertEquals(2, completedTests.getContent().size(), "A lista deve conter 2 itens.");
+
+        // Verifica se o repositório e o mapper foram chamados corretamente
+        verify(testRepository, times(1)).findCompletedTests(any(Pageable.class));
     }
 
     @Test
     @DisplayName("Deve retornar uma lista vazia de simulados quando não houver simulados completados.")
     void shouldReturnEmptyList_WhenNoCompletedTestsExist() {
-        mockAuthenticatedUser();
+        Student student = new Student();
+        student.setId(1L);
 
-        when(testRepository.findCompletedTests()).thenReturn(Collections.emptyList());
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
-        List<TestResponseDTO> completedTests = testService.getCompletedTests();
+        // Mock do repositório para retornar uma lista vazia paginada
+        Page<TestEntity> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(emptyPage);
 
-        assertNotNull(completedTests, "A lista não deve ser nula.");
+        // Chama o método do serviço
+        Page<TestEntity> completedTests = testService.getCompletedTests(0, 10);
+
+        // Verificações
+        assertNotNull(completedTests, "A lista de testes completados não deve ser nula.");
         assertTrue(completedTests.isEmpty(), "A lista deve estar vazia.");
-        verify(testRepository, times(1)).findCompletedTests();
+
+        // Verifica se o repositório foi chamado corretamente
+        verify(testRepository, times(1)).findCompletedTests(any(Pageable.class));
+
+        // Verifica se o mapper nunca foi chamado, pois a lista está vazia
         verify(testMapper, never()).toDTO(any(TestEntity.class));
     }
 
     @Test
     @DisplayName("Deve retornar uma lista vazia quando o usuário está autenticado, mas não há simulados completados.")
     void shouldReturnEmptyList_WhenAuthenticatedButNoCompletedTests() {
-        mockAuthenticatedUser();
+        Student student = new Student();
+        student.setId(1L);
 
-        when(testRepository.findCompletedTests()).thenReturn(Collections.emptyList());
+        when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
-        List<TestResponseDTO> completedTests = testService.getCompletedTests();
+        Page<TestEntity> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(emptyPage);
+
+        Page<TestEntity> completedTests = testService.getCompletedTests(0, 10);
 
         assertNotNull(completedTests, "A lista não deve ser nula.");
         assertTrue(completedTests.isEmpty(), "A lista deve estar vazia.");
-        verify(testRepository, times(1)).findCompletedTests();
         verify(testMapper, never()).toDTO(any(TestEntity.class));
     }
 
