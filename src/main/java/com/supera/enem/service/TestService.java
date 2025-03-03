@@ -3,6 +3,7 @@ package com.supera.enem.service;
 import com.supera.enem.controller.DTOS.TestResponseDTO;
 import com.supera.enem.domain.*;
 import com.supera.enem.domain.enums.TestType;
+import com.supera.enem.exception.ResourceAlreadyExists;
 import com.supera.enem.exception.ResourceNotFoundException;
 import com.supera.enem.mapper.TestMapper;
 import com.supera.enem.repository.QuestionRepository;
@@ -83,17 +84,17 @@ public class TestService {
         Student student = authenticatedService.getAuthenticatedStudent();
 
         if (hasTestInCurrentWeek()) {
-            throw new RuntimeException("Test for the current week already exists.");
+            throw new ResourceAlreadyExists("Test for the current week already exists.");
         }
 
         WeeklyReport lastWeeklyReport = getLastWeeklyReportByStudent();
         if (lastWeeklyReport == null) {
-            throw new RuntimeException("No weekly report found for the student");
+            throw new ResourceNotFoundException("No weekly report found for the student");
         }
 
         Set<Content> contents = lastWeeklyReport.getContents();
         if (contents.isEmpty()) {
-            throw new RuntimeException("No content found in the weekly report");
+            throw new ResourceNotFoundException("No content found in the weekly report");
         }
 
         TestEntity testEntity = new TestEntity();
@@ -106,7 +107,7 @@ public class TestService {
             List<Question> questions = questionRepository.findRandomQuestionsByContent(content.getId(), 10);
 
             if (questions.isEmpty()) {
-                throw new RuntimeException("No questions found for content with id: " + content.getId());
+                throw new ResourceNotFoundException("No questions found for content with id: " + content.getId());
             }
 
             for (Question question : questions) {
