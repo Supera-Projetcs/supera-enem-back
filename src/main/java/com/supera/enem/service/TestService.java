@@ -38,6 +38,7 @@ public class TestService {
     @Autowired
     private AuthenticatedService authenticatedService;
 
+    @Transactional()
     public Page<TestResponseDTO> getCompletedTests(int page, int size) {
         Student student = authenticatedService.getAuthenticatedStudent();
         if (student == null) {
@@ -67,6 +68,7 @@ public class TestService {
         return testMapper.toDTO(testEntity);
     }
 
+    @Transactional()
     public boolean wasThisWeekTestCompleted() {
         List<TestEntity> testEntities = getThisWeekTests();
         if (testEntities.isEmpty()) {
@@ -118,6 +120,7 @@ public class TestService {
         return testMapper.toDTO(testEntity);
     }
 
+    @Transactional()
     public WeeklyReport getLastWeeklyReportByStudent() {
         Student student = authenticatedService.getAuthenticatedStudent();
         return weeklyReportRepository.findTopByStudentOrderByDateDesc(student.getId())
