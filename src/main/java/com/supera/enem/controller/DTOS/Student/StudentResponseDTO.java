@@ -35,4 +35,6 @@ public class StudentResponseDTO {
     private String password;
     @NotNull(message = "Dias de estudo não pode ser nulo.")
     private Set<Weekday> preferredStudyDays;
+
+    private boolean onboardingDone;
 }

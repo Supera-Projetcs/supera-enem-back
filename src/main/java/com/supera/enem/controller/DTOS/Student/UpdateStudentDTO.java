@@ -19,4 +19,5 @@ public class UpdateStudentDTO {
     private LocalDate birthDate;
     private AddressDTO address;
     private Set<Weekday> preferredStudyDays;
+    private boolean onboardingDone;
 }

@@ -50,5 +50,7 @@ public class Student {
     @Column(name = "preferred_study_day")
     private Set<Weekday> preferredStudyDays;
 
+    @Column(name = "onboarding_done", nullable = false)
+    private boolean onboardingDone = false;
 
 }
