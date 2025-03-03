@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -23,5 +24,6 @@ public class TestResponseDTO {
 
     private int totalQuestions; // Novo campo
     private int totalCorrectAnswers;
+    private Set<ContentDTO> contents;
 
 }
