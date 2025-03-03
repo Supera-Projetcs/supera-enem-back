@@ -80,4 +80,13 @@ public class TestEntity {
 
         return answeredQuestionIds.containsAll(questionIds);
     }
+
+    public Set<Content> getUniqueContents() {
+        if (this.questions == null || this.questions.isEmpty()) {
+            return Set.of();
+        }
+        return this.questions.stream()
+                .flatMap(question -> question.getContents().stream())
+                .collect(Collectors.toSet());
+    }
 }
