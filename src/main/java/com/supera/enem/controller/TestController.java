@@ -27,10 +27,10 @@ public class TestController {
     }
 
     @GetMapping("/completed")
-    public ResponseEntity<Page<TestEntity>> getCompletedTests(
+    public ResponseEntity<Page<TestResponseDTO>> getCompletedTests(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<TestEntity> tests = testService.getCompletedTests(page, size);
+        Page<TestResponseDTO> tests = testService.getCompletedTests(page, size);
         return ResponseEntity.ok(tests);
     }
 

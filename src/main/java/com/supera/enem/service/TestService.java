@@ -38,13 +38,14 @@ public class TestService {
     @Autowired
     private AuthenticatedService authenticatedService;
 
-    public Page<TestEntity> getCompletedTests(int page, int size) {
+    public Page<TestResponseDTO> getCompletedTests(int page, int size) {
         Student student = authenticatedService.getAuthenticatedStudent();
         if (student == null) {
             throw new RuntimeException("User not authenticated");
         }
         Pageable pageable = PageRequest.of(page, size);
-        return testRepository.findCompletedTests(pageable);
+        Page<TestEntity> testEntities = testRepository.findCompletedTests(pageable);
+        return testEntities.map(testMapper::toDTO);
     }
 
     @Transactional

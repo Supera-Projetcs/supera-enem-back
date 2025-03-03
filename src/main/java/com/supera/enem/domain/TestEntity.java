@@ -44,6 +44,19 @@ public class TestEntity {
     )
     private List<Question> questions = new ArrayList<>();
 
+    public int getTotalQuestions() {
+        return this.questions != null ? this.questions.size() : 0;
+    }
+
+    public int getTotalCorrectAnswers() {
+        if (this.answers == null || this.answers.isEmpty()) {
+            return 0;
+        }
+        return (int) this.answers.stream()
+                .filter(Answer::isCorrect)
+                .count();
+    }
+
     @OneToMany(mappedBy = "testEntity", fetch = FetchType.LAZY)
     private List<Answer> answers = new ArrayList<>();
 

@@ -104,12 +104,23 @@ public class TestControllerIntegrationsTest {
     @Test
     public void testGetCompletedTests_Success() throws Exception {
         // Cria a lista de TestResponseDTO com os campos corretos
-        TestResponseDTO testResponseDTO = new TestResponseDTO(1L, TestType.WEEKLY, new Date(1666243200000L), studentMapper.toStudentDTO(student), List.of());
-        TestResponseDTO testResponseDTO2 = new TestResponseDTO(2L, TestType.WEEKLY, new Date(1666329600000L), studentMapper.toStudentDTO(student), List.of());
-        List<TestEntity> completedTestsList = Arrays.asList(testMapper.toEntity(testResponseDTO), testMapper.toEntity(testResponseDTO2));
+        TestResponseDTO testResponseDTO = new TestResponseDTO();
+        testResponseDTO.setId(1L);
+        testResponseDTO.setType(TestType.WEEKLY);
+        testResponseDTO.setDate(new Date(1666243200000L));
+        testResponseDTO.setStudent(studentMapper.toStudentDTO(student));
+        testResponseDTO.setQuestions(List.of());
+
+        TestResponseDTO testResponseDTO2 = new TestResponseDTO();
+        testResponseDTO2.setId(2L);
+        testResponseDTO2.setType(TestType.WEEKLY);
+        testResponseDTO2.setDate(new Date(1666329600000L));
+        testResponseDTO2.setStudent(studentMapper.toStudentDTO(student));
+        testResponseDTO2.setQuestions(List.of());
+        List<TestResponseDTO> completedTestsList = Arrays.asList(testResponseDTO, testResponseDTO2);
 
         // Cria um Page de TestResponseDTO
-        Page<TestEntity> completedTests = new PageImpl<>(completedTestsList);
+        Page<TestResponseDTO> completedTests = new PageImpl<>(completedTestsList);
 
         // Mock do serviço para retornar a lista paginada de TestResponseDTO
         when(testService.getCompletedTests(0, 10)).thenReturn(completedTests);

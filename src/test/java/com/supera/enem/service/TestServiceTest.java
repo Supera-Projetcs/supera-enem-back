@@ -96,7 +96,7 @@ class TestServiceTest extends BaseTest {
         when(testMapper.toDTO(testEntity1)).thenReturn(testResponseDTO1);
         when(testMapper.toDTO(testEntity2)).thenReturn(testResponseDTO2);
 
-        Page<TestEntity> completedTests = testService.getCompletedTests(0, 10);
+        Page<TestResponseDTO> completedTests = testService.getCompletedTests(0, 10);
 
         // Verificações
         assertNotNull(completedTests, "A lista de testes completados não deve ser nula.");
@@ -119,7 +119,7 @@ class TestServiceTest extends BaseTest {
         when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(emptyPage);
 
         // Chama o método do serviço
-        Page<TestEntity> completedTests = testService.getCompletedTests(0, 10);
+        Page<TestResponseDTO> completedTests = testService.getCompletedTests(0, 10);
 
         // Verificações
         assertNotNull(completedTests, "A lista de testes completados não deve ser nula.");
@@ -143,7 +143,7 @@ class TestServiceTest extends BaseTest {
         Page<TestEntity> emptyPage = new PageImpl<>(Collections.emptyList());
         when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(emptyPage);
 
-        Page<TestEntity> completedTests = testService.getCompletedTests(0, 10);
+        Page<TestResponseDTO> completedTests = testService.getCompletedTests(0, 10);
 
         assertNotNull(completedTests, "A lista não deve ser nula.");
         assertTrue(completedTests.isEmpty(), "A lista deve estar vazia.");

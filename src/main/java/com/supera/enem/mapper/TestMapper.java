@@ -16,6 +16,8 @@ public interface TestMapper {
     TestMapper INSTANCE = Mappers.getMapper(TestMapper.class);
 
     @Mapping(target = "type", source = "type")
+    @Mapping(target = "totalQuestions", source = "totalQuestions")
+    @Mapping(target = "totalCorrectAnswers", source = "totalCorrectAnswers")
     TestResponseDTO toDTO(TestEntity testEntity);
 
     TestEntity toEntity(TestResponseDTO testResponseDTO);
