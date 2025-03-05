@@ -18,12 +18,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -60,14 +63,14 @@ public class WeeklyReportService {
     }
 
     private List<AlitaRequestDTO> getAlitaReportsByStudent(Student student) {
-
         String url = alitaUrl + "/contents/?number_or_contents=" + student.getPreferredStudyDays().size() * 3;
         List<Performance> performances = performanceRepository.findLatestPerformancesByStudent(student.getId());
 
-        List<AlitaRequestDTO> alitaList =  performances.stream().map(performance -> {
-            System.out.println(performance.getContent().getSubject().getId());
+        List<AlitaRequestDTO> alitaList = performances.stream().map(performance -> {
             Double pesoSubclasse = studentSubjectRepository
-                    .findStudentSubjectBySubject_IdAndStudent_Id(performance.getContent().getSubject().getId(), student.getId()).get().getSubjectWeight();
+                    .findStudentSubjectBySubject_IdAndStudent_Id(performance.getContent().getSubject().getId(), student.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("StudentSubject not found"))
+                    .getSubjectWeight();
 
             AlitaRequestDTO alitaRequestDTO = new AlitaRequestDTO();
             alitaRequestDTO.setId(performance.getContent().getId());
@@ -78,22 +81,21 @@ public class WeeklyReportService {
             alitaRequestDTO.setSubclasse(performance.getContent().getSubject().getName());
             alitaRequestDTO.setPeso_da_subclasse(pesoSubclasse);
 
-            System.out.println(alitaRequestDTO);
             return alitaRequestDTO;
         }).toList();
 
-
-
         try {
-            System.out.println("Enviando requisição para o servidor: " + alitaList);
-            System.out.println("URL: " + url);
-            List<AlitaRequestDTO> response =  restTemplate.postForObject(url, alitaList, List.class);
-            System.out.println("Resposta do servidor: " + response);
+            List<AlitaRequestDTO> response = restTemplate.postForObject(url, alitaList, List.class);
             return response;
-        } catch (Exception ex) {
-            throw new RuntimeException("Erro ocorreu", ex);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                System.err.println("Bad Request from Alita API: " + e.getResponseBodyAsString());
+                return Collections.emptyList();
+            }
+            throw new RuntimeException("Erro ao chamar a API do Alita", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro inesperado ao chamar a API do Alita", e);
         }
-
     }
 
     private WeeklyReport generateWeeklyReport(List<?> rawList, Student student) {
