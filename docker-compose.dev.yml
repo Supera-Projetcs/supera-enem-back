@@ -6,6 +6,7 @@ volumes:
   minio_config: {}
   grafana_data: {}
   prometheus_data: {}
+  rabbitmq_data: {}
 
 services:
   postgres:
@@ -35,6 +36,17 @@ services:
 #      - keycloak
 #      - postgres
 #      - minio
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # Porta para conexão AMQP
+      - "15672:15672"  # Porta para a interface de gerenciamento do RabbitMQ
+    env_file:
+      - .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   grafana:
     image: grafana/grafana
@@ -97,3 +109,4 @@ services:
     volumes:
       - minio_data:/data
       - minio_config:/root/.minio
+
