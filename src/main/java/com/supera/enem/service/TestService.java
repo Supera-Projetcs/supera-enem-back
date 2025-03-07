@@ -46,7 +46,7 @@ public class TestService {
             throw new RuntimeException("User not authenticated");
         }
         Pageable pageable = PageRequest.of(page, size);
-        Page<TestEntity> testEntities = testRepository.findCompletedTests(pageable);
+        Page<TestEntity> testEntities = testRepository.findCompletedTestsByStudent(student, pageable);
         return testEntities.map(testMapper::toDTO);
     }
 

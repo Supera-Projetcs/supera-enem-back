@@ -150,8 +150,10 @@ class WeeklyReportServiceTest {
     void shouldReturnExistingWeeklyReport() {
         // Arrange
         when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
+        List<WeeklyReport> reportList = new ArrayList<>();
+        reportList.add(existingReport);
         when(weeklyReportRepository.findByStudentIdAndDateBetween(anyLong(), any(), any()))
-                .thenReturn(existingReport);
+                .thenReturn(reportList);
         when(weeklyReportMapper.toDto(existingReport)).thenReturn(reportDTO);
 
 

@@ -158,8 +158,7 @@ public class WeeklyReportService {
         List<WeeklyReport> existingReports = weeklyReportRepository
                 .findByStudentIdAndDateBetween(student.getId(), weekStart, weekEnd);
 
-        if (!existingReports.isEmpty()) {
-
+        if (existingReports!=null && !existingReports.isEmpty()) {
             return this.convertToDto(existingReports.get(0));
         }
 

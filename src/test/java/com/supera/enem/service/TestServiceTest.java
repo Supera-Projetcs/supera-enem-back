@@ -82,7 +82,7 @@ class TestServiceTest extends BaseTest {
         Page<TestEntity> testEntityPage = new PageImpl<>(testEntities);
 
         // Mock do repositório para retornar a lista paginada de entidades
-        when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(testEntityPage);
+        when(testRepository.findCompletedTestsByStudent(any(), any(Pageable.class))).thenReturn(testEntityPage);
 
         // Mapper convertendo entidades para DTOs
         TestResponseDTO testResponseDTO1 = new TestResponseDTO();
@@ -103,7 +103,7 @@ class TestServiceTest extends BaseTest {
         assertEquals(2, completedTests.getContent().size(), "A lista deve conter 2 itens.");
 
         // Verifica se o repositório e o mapper foram chamados corretamente
-        verify(testRepository, times(1)).findCompletedTests(any(Pageable.class));
+        verify(testRepository, times(1)).findCompletedTestsByStudent(any(), any(Pageable.class));
     }
 
     @Test
@@ -116,7 +116,7 @@ class TestServiceTest extends BaseTest {
 
         // Mock do repositório para retornar uma lista vazia paginada
         Page<TestEntity> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(emptyPage);
+        when(testRepository.findCompletedTestsByStudent(any(), any(Pageable.class))).thenReturn(emptyPage);
 
         // Chama o método do serviço
         Page<TestResponseDTO> completedTests = testService.getCompletedTests(0, 10);
@@ -126,7 +126,7 @@ class TestServiceTest extends BaseTest {
         assertTrue(completedTests.isEmpty(), "A lista deve estar vazia.");
 
         // Verifica se o repositório foi chamado corretamente
-        verify(testRepository, times(1)).findCompletedTests(any(Pageable.class));
+        verify(testRepository, times(1)).findCompletedTestsByStudent(any(), any(Pageable.class));
 
         // Verifica se o mapper nunca foi chamado, pois a lista está vazia
         verify(testMapper, never()).toDTO(any(TestEntity.class));
@@ -141,7 +141,7 @@ class TestServiceTest extends BaseTest {
         when(authenticatedService.getAuthenticatedStudent()).thenReturn(student);
 
         Page<TestEntity> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(testRepository.findCompletedTests(any(Pageable.class))).thenReturn(emptyPage);
+        when(testRepository.findCompletedTestsByStudent(any(), any(Pageable.class))).thenReturn(emptyPage);
 
         Page<TestResponseDTO> completedTests = testService.getCompletedTests(0, 10);
 
