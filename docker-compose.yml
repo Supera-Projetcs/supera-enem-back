@@ -44,7 +44,7 @@ services:
       - "5672:5672"  # Porta para conexão AMQP
       - "15672:15672"  # Porta para a interface de gerenciamento do RabbitMQ
     env_file:
-      - .dev.env
+      - .env
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
