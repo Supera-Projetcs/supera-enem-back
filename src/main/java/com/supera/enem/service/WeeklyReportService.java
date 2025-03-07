@@ -74,6 +74,14 @@ public class WeeklyReportService {
 
             AlitaRequestDTO alitaRequestDTO = new AlitaRequestDTO();
             alitaRequestDTO.setId(performance.getContent().getId());
+            System.out.println("puta");
+            System.out.println(performance.getContent().getId());
+            System.out.println(performance.getContent().getName());
+            System.out.println(performance.getPerformanceRate());
+            System.out.println(performance.getContent().getContent_weight());
+            System.out.println(performance.getContent().getQuestion_weight());
+            System.out.println(performance.getContent().getSubject().getName());
+            System.out.println(performance);
             alitaRequestDTO.setDesempenho(performance.getPerformanceRate());
             alitaRequestDTO.setPeso_da_classe(performance.getContent().getContent_weight());
             alitaRequestDTO.setPeso_por_questao(performance.getContent().getQuestion_weight());
@@ -139,7 +147,6 @@ public class WeeklyReportService {
                 .sorted((content1, content2) -> Long.compare(content2.getId(), content1.getId()))
                 .collect(Collectors.toList());
 
-
         WeeklyReportResponseDTO dto = new WeeklyReportResponseDTO();
         dto.setId(weeklyReport.getId());
         dto.setDate(weeklyReport.getDate());
@@ -153,7 +160,6 @@ public class WeeklyReportService {
         LocalDate currentDate = LocalDate.now();
         LocalDate weekStart = currentDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
         LocalDate weekEnd = currentDate.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
-
 
         List<WeeklyReport> existingReports = weeklyReportRepository
                 .findByStudentIdAndDateBetween(student.getId(), weekStart, weekEnd);
