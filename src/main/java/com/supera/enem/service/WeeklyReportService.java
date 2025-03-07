@@ -155,11 +155,12 @@ public class WeeklyReportService {
         LocalDate weekEnd = currentDate.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
 
 
-        WeeklyReport existingReport = weeklyReportRepository
+        List<WeeklyReport> existingReports = weeklyReportRepository
                 .findByStudentIdAndDateBetween(student.getId(), weekStart, weekEnd);
 
-        if (existingReport != null) {
-            return this.convertToDto(existingReport);
+        if (!existingReports.isEmpty()) {
+
+            return this.convertToDto(existingReports.get(0));
         }
 
         System.out.println("Generating new weekly report for student: " + student.getId());
