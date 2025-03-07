@@ -84,11 +84,8 @@ services:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_DB=postgres
-      - KC_HOSTNAME=https://keycloak.yasc.com.br
-      - KEYCLOAK_CONTENT_SECURITY_POLICY="frame-src 'self' https://keycloak.yasc.com.br; object-src 'none';"
       - KC_DB_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       - KC_DB_USERNAME=${POSTGRES_USER}
-      - KC_PROXY=edge
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
     command: start-dev
     ports:
